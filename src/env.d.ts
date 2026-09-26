@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 export type CastDisplaySource = {
   id: string;
   name: string;
@@ -22,6 +24,9 @@ export type CastTarget = {
 };
 
 declare global {
+  /** Versi aplikasi, di-inject oleh Vite dari package.json saat build. */
+  const __APP_VERSION__: string;
+
   interface Window {
     castv?: {
       getDisplaySources: () => Promise<CastDisplaySource[]>;

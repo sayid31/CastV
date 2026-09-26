@@ -1,0 +1,116 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag yang akandirilis (contoh: v0.2.0)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build & publish release
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve tag
+        id: meta
+        shell: pwsh
+        run: |
+          $tag = if ($env:GITHUB_EVENT_NAME -eq 'workflow_dispatch') {
+            $env:INPUT_TAG
+          } else {
+            $env:GITHUB_REF_NAME
+          }
+          if (-not $tag) { throw 'Tag tidak ditemukan.' }
+          $version = $tag -replace '^v', ''
+          if ($version -notmatch '^\d+\.\d+\.\d+$') {
+            throw "Format tag tidak valid: $tag (harus vMAJOR.MINOR.PATCH)"
+          }
+          "tag=$tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Sync version from tag
+        shell: pwsh
+        run: npm version ${{ steps.meta.outputs.version }} --no-git-tag-version --allow-same-version
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build installer
+        run: npm run dist
+        env:
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+
+      - name: Verify built files
+        shell: pwsh
+        run: |
+          $expected = @(
+            "release/CastV-${{ steps.meta.outputs.version }}-x64.exe",
+            "release/CastV-${{ steps.meta.outputs.version }}-portable.exe"
+          )
+          $missing = $expected | Where-Object { -not (Test-Path $_) }
+          if ($missing) {
+            Write-Error "File installer tidak ditemukan: $($missing -join ', ')"
+            exit 1
+          }
+          $expected | ForEach-Object {
+            $mb = [math]::Round((Get-Item $_).Length / 1MB, 1)
+            Write-Output "  $_ ($mb MB)"
+          }
+
+      - name: Publish GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.meta.outputs.tag }}
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          $notes = @"
+          ## CastV $env:TAG
+
+          Download untuk Windows:
+
+          - Installer (NSIS): https://github.com/${{ github.repository }}/releases/latest/download/CastV-$env:VERSION-x64.exe
+          - Portable (tanpa instalasi): https://github.com/${{ github.repository }}/releases/latest/download/CastV-$env:VERSION-portable.exe
+
+          ### Catatan
+          - Windows 10/11 x64
+          - Installer belum code-signed, jadi Windows SmartScreen bisa menampilkan peringatan. Pilih **More info -> Run anyway**.
+          - Jalur AirPlay mengirim video HLS (delay beberapa detik). Jalur browser memakai WebRTC.
+          "@
+
+          gh release create $env:TAG `
+            "release/CastV-$env:VERSION-x64.exe" `
+            "release/CastV-$env:VERSION-portable.exe" `
+            "release/CastV-$env:VERSION-x64.exe.blockmap" `
+            --title "CastV $env:TAG" `
+            --notes $notes `
+            --generate-notes
+
+      - name: Upload installer artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: castv-${{ steps.meta.outputs.version }}
+          path: |
+            release/*.exe
+            release/*.blockmap
+          retention-days: 30
+          if-no-files-found: error

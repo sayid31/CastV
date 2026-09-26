@@ -13,9 +13,9 @@ import './landing.css';
 const GITHUB_REPO = 'sayid31/CastV';
 
 const DOWNLOAD = {
-  version: '0.1.0',
-  installer: `https://github.com/${GITHUB_REPO}/releases/latest/download/CastV-0.1.0-x64.exe`,
-  portable: `https://github.com/${GITHUB_REPO}/releases/latest/download/CastV-0.1.0-portable.exe`,
+  version: __APP_VERSION__,
+  installer: `https://github.com/${GITHUB_REPO}/releases/latest/download/CastV-${__APP_VERSION__}-x64.exe`,
+  portable: `https://github.com/${GITHUB_REPO}/releases/latest/download/CastV-${__APP_VERSION__}-portable.exe`,
 };
 
 const FEATURES = [

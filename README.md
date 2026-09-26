@@ -146,21 +146,65 @@ Link download memakai pola stabil `releases/latest/download/<nama-file>` yang se
 
 ### Menerbitkan release baru
 
-```bash
-# 1. Build installer
-npm run dist
+Nomor versi dibaca dari satu sumber: `package.json`. Workflow otomatis mengambilnya dari tag Git.
 
-# 2. Commit & push perubahan
+```bash
+# 1. bump versi
+npm version 0.2.0        # menulis package.json + package-lock.json
+
+# 2. commit & push
 git add -A
-git commit -m "release: v0.1.0"
+git commit -m "release: v0.2.0"
 git push
 
-# 3. Buat release di GitHub, lalu upload file dari release/
-#    release/CastV-0.1.0-x64.exe
-#    release/CastV-0.1.0-portable.exe
+# 3. buat tag -> memicu workflow Release otomatis
+git tag v0.2.0
+git push origin v0.2.0
 ```
 
-Script `npm run downloads:sync` menyalin installer dari `release/` ke `public/downloads/` untuk keperluan testing lokal landing page. Folder ini tidak di-*commit* dan tidak ikut ke dalam paket installer aplikasi.
+GitHub Actions (`release.yml`) lalu otomatis:
+
+1. Membaca versi dari tag (`v0.2.0` → `0.2.0`) dan menyinkronkan `package.json`
+2. Build frontend + installer Windows (`npm run dist`)
+3. Verifikasi kedua file `.exe` benar-benar ada
+4. Membuat GitHub Release beserta asset-nya
+5. Upload artifact ke workflow run
+
+Karena versi ikut di-*inject* ke landing page saat build, nama file di release selalu cocok dengan link download — tidak ada yang perlu diedit manual.
+
+> `npm version 0.2.0` sudah membuat commit **dan** tag secara otomatis,
+> jadi cukup `git push && git push --follow-tags`.
+
+### Workflow yang tersedia
+
+| File | Trigger | Fungsi |
+| --- | --- | --- |
+| `.github/workflows/ci.yml` | push / pull request | Typecheck, build, dan package installer sebagai artifact |
+| `.github/workflows/release.yml` | push tag `v*` | Build + publikasi GitHub Release |
+
+### Code signing (opsional)
+
+Installer MVP belum ditandatangani. Untuk menandatangani, tambahkan repository secrets:
+
+| Secret | Isi |
+| --- | --- |
+| `CSC_LINK` | Path ke file `.pfx` (base64) atau URL ke sertifikat |
+| `CSC_KEY_PASSWORD` | Password sertifikat |
+
+Kalau secret tersebut belum diisi, build tetap berjalan dan menghasilkan installer unsigned.
+
+### Deploy landing page ke Vercel
+
+Dua cara:
+
+1. **Git integration (disarankan, tanpa secret)** — connect repo `sayid31/CastV` di dashboard Vercel dengan branch `master`. Setiap push otomatis deploy.
+2. **Vercel CLI dari lokal** — `vercel --prod --yes --name castv`
+
+Config build sudah tersimpan di `vercel.json`, dan `.vercelignore` memastikan installer `.exe` tidak ikut ter-upload.
+
+### Script sinkronisasi installer (opsional)
+
+`npm run downloads:sync` menyalin installer dari `release/` ke `public/downloads/` untuk testing lokal landing page dengan file self-hosted. Folder ini tidak di-*commit* dan tidak ikut ke deployment Vercel maupun paket installer aplikasi.
 
 ## Menjalankan versi web saja
 
