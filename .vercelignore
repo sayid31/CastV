@@ -1,0 +1,19 @@
+# Build artifacts - Vercel builds these itself from source
+dist
+release
+node_modules
+android-tv/app/build
+android-tv/build
+android-tv/.gradle
+android-tv/local.properties
+android-tv/CastV-TV-debug.apk
+
+# Installer binaries live in GitHub Release, not in this deployment.
+# (Vercel Hobby limits static uploads to 100 MB; our installer is ~107 MB.)
+public/downloads
+
+# Local/editor files
+.playwright-mcp
+*.log
+.DS_Store
+.vercel

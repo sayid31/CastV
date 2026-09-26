@@ -2,6 +2,12 @@
 
 Aplikasi desktop untuk menampilkan layar PC ke TV AirPlay atau browser di jaringan lokal.
 
+| | |
+| --- | --- |
+| **Repository** | https://github.com/sayid31/CastV |
+| **Landing page** | https://castv.vercel.app |
+| **Download** | https://github.com/sayid31/CastV/releases/latest |
+
 ## Struktur halaman
 
 Build ini menghasilkan tiga halaman terpisah:
