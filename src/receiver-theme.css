@@ -1,0 +1,46 @@
+/* CastV receiver — brand overrides (amber identity, replaces cyan) */
+
+:root {
+  --cyan: #e8913a;
+  --cyan-deep: #d07d2c;
+  --ink: #eceef2;
+  --ink-soft: #a5a7b0;
+  --muted: #74767f;
+}
+
+.receiver-shell { background: #141416; }
+.receiver-header { border-bottom: 1px solid #232429; }
+.receiver-overline { color: var(--cyan); }
+.receiver-header-right a:hover { color: var(--cyan); }
+.receiver-secure { color: #d9a06a; }
+
+.receiver-topline h1 { color: #f2f3f6; }
+.receiver-status { color: #9a9ca6; background: #1c1d21; border-color: #2c2d34; }
+.receiver-status.status-connected { color: #7fe0b0; }
+.receiver-status.status-connected i { background: #46c98a; box-shadow: 0 0 0 4px rgba(70, 201, 138, 0.14); }
+.receiver-status.status-error { color: #f79a9a; }
+.receiver-status.status-error i { background: #ef5f5f; }
+.receiver-status.status-negotiating i,
+.receiver-status.status-connecting i { background: #8f7cf0; }
+
+.receiver-stage { background: #0d0d0f; border-color: #26272c; box-shadow: 0 22px 70px rgba(0, 0, 0, 0.5); }
+.receiver-stage video { background: #0a0a0c; }
+.waiting-orb { border-color: #3a2c1a; }
+.waiting-orb::before { border-color: #33261a; }
+.waiting-orb span { background: var(--cyan); box-shadow: 0 0 16px rgba(232, 145, 58, 0.45); }
+.waiting-orb span:nth-child(2) { background: #f0a04a; }
+.receiver-waiting strong, .receiver-error-state strong { color: #e6e7ea; }
+.receiver-waiting > span { color: #6f7178; }
+.receiver-waiting > span b { color: #e0a468; }
+.receiver-waiting small { color: #5c5e65; }
+.receiver-error-state p { color: #74767f; }
+.error-orb { color: #f79a9a; background: rgba(239, 95, 95, 0.1); border-color: rgba(239, 95, 95, 0.24); }
+
+.light-button { color: #1c1206; background: linear-gradient(140deg, #f0a04a, #e8913a); }
+.light-button:hover { background: linear-gradient(140deg, #f6ad5f, #ec9a41); color: #1c1206; }
+.start-viewing-button { background: linear-gradient(140deg, #f0a04a, #e8913a); color: #1c1206; }
+.start-viewing-button:hover { background: linear-gradient(140deg, #f6ad5f, #ec9a41); }
+
+.receiver-brand .brand-accent { color: var(--cyan); }
+.receiver-meta, .receiver-bottomline { color: #6f7178; }
+.receiver-footer { border-top: 1px solid #232429; color: #5d5f68; }

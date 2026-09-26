@@ -1,0 +1,129 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e10]:
+        - text: Cast
+        - emphasis [ref=e11]: V
+      - generic [ref=e12]: Desktop
+    - generic [ref=e13]:
+      - generic [ref=e14]: Koneksi lokal
+      - button "Share Screen" [ref=e18] [cursor=pointer]
+  - generic [ref=e22]:
+    - complementary [ref=e23]:
+      - generic [ref=e24]:
+        - generic [ref=e25]: Menu
+        - navigation [ref=e26]:
+          - button "Berbagi Layar Mulai streaming" [ref=e27] [cursor=pointer]:
+            - generic [ref=e32]:
+              - strong [ref=e33]: Berbagi Layar
+              - generic [ref=e34]: Mulai streaming
+          - button "Perangkat Nearby AirPlay & browser" [ref=e35] [cursor=pointer]:
+            - generic [ref=e39]:
+              - strong [ref=e40]: Perangkat Nearby
+              - generic [ref=e41]: AirPlay & browser
+          - button "Web Receiver Buka di perangkat lain" [ref=e42] [cursor=pointer]:
+            - generic [ref=e47]:
+              - strong [ref=e48]: Web Receiver
+              - generic [ref=e49]: Buka di perangkat lain
+          - button "Tentang CastV Versi & informasi" [ref=e50] [cursor=pointer]:
+            - generic [ref=e55]:
+              - strong [ref=e56]: Tentang CastV
+              - generic [ref=e57]: Versi & informasi
+      - generic [ref=e58]:
+        - generic [ref=e59]: Pintasan
+        - button "Mulai streaming" [ref=e60] [cursor=pointer]
+        - button "Buka receiver" [ref=e63] [cursor=pointer]
+      - generic [ref=e66]:
+        - generic [ref=e67]:
+          - generic [ref=e68]: Versi
+          - strong [ref=e69]: 0.1.0
+        - generic [ref=e70]:
+          - generic [ref=e71]: Mode
+          - strong [ref=e72]: AirPlay · HLS
+        - paragraph [ref=e73]: Preview tidak direkam dan tidak disimpan.
+    - main [ref=e74]:
+      - generic [ref=e75]:
+        - generic [ref=e76]:
+          - generic [ref=e77]:
+            - text: Sender
+            - heading "Berbagi layar PC" [level=1] [ref=e78]
+            - paragraph [ref=e79]: Pilih perangkat receiver, tentukan sumber layar, lalu stream berjalan otomatis.
+          - generic [ref=e80]:
+            - generic [ref=e81]:
+              - generic [ref=e82]: "1"
+              - text: Receiver
+            - generic [ref=e84]:
+              - generic [ref=e85]: "2"
+              - text: Layar
+            - generic [ref=e87]:
+              - generic [ref=e88]: "3"
+              - text: Stream
+        - region [ref=e89]:
+          - generic [ref=e90]:
+            - generic [ref=e91]:
+              - text: Sender console
+              - heading "Kirim layar PC dalam beberapa klik." [level=2] [ref=e92]
+            - generic "Buat sesi untuk mendapatkan QR code." [ref=e93]: Siap dimulai
+          - generic [ref=e96]:
+            - generic [ref=e97]:
+              - generic [ref=e98]:
+                - generic [ref=e99]:
+                  - generic [ref=e100]: Sesi aktif
+                  - strong [ref=e102]: — — — — — —
+                - generic [ref=e103]:
+                  - generic [ref=e104]: Koneksi
+                  - strong [ref=e105]: Belum aktif
+              - generic [ref=e107]:
+                - strong [ref=e111]: Belum ada sesi mirroring
+                - paragraph [ref=e112]: Buat kode dan QR code untuk menghubungkan perangkat receiver.
+                - button "Share Screen" [ref=e113] [cursor=pointer]
+              - generic [ref=e117]:
+                - button "Share Screen" [ref=e118] [cursor=pointer]
+                - generic [ref=e122]: Pastikan kedua perangkat satu Wi-Fi
+            - complementary [ref=e125]:
+              - generic [ref=e126]:
+                - generic [ref=e127]: Preview lokal
+                - generic [ref=e128]: private
+              - generic [ref=e134]:
+                - strong [ref=e139]: Preview akan muncul di sini
+                - generic [ref=e140]: Screen sharing tidak direkam atau disimpan.
+              - generic [ref=e141]:
+                - generic [ref=e142]: Menunggu izin
+                - generic [ref=e144]: WebRTC · LAN
+          - generic [ref=e145]:
+            - generic [ref=e146]:
+              - generic [ref=e147]:
+                - text: Nearby / auto-connect
+                - heading "Perangkat di Wi-Fi yang sama" [level=3] [ref=e148]
+                - paragraph [ref=e149]: TV AirPlay dan browser receiver muncul otomatis—tanpa URL atau QR.
+              - generic [ref=e150]: 0 ditemukan
+            - generic [ref=e152]: Nearby discovery belum terhubung.
+            - generic [ref=e159]:
+              - strong [ref=e160]: Belum ada receiver nearby
+              - generic [ref=e161]: TV AirPlay akan muncul otomatis; browser receiver juga bisa dibuka lewat URL di bawah.
+            - generic [ref=e162]:
+              - generic [ref=e163]:
+                - generic [ref=e164]: Nearby receiver URL
+                - code [ref=e165]: Memuat alamat jaringan…
+              - button "Salin nearby receiver URL" [ref=e166] [cursor=pointer]
+        - generic [ref=e170]:
+          - generic [ref=e176]:
+            - heading "Tentang CastV" [level=2] [ref=e177]
+            - paragraph [ref=e178]: Aplikasi desktop untuk menampilkan layar PC ke TV AirPlay atau browser di jaringan lokal.
+          - generic [ref=e179]:
+            - generic [ref=e180]:
+              - generic [ref=e181]: Jalur TV
+              - strong [ref=e182]: AirPlay HLS
+              - generic [ref=e183]: Butuh beberapa detik, video-only.
+            - generic [ref=e184]:
+              - generic [ref=e185]: Jalur browser
+              - strong [ref=e186]: WebRTC
+              - generic [ref=e187]: Langsung antar perangkat di LAN.
+            - generic [ref=e188]:
+              - generic [ref=e189]: Instalasi TV
+              - strong [ref=e190]: Tidak perlu
+              - generic [ref=e191]: Tanpa aplikasi, URL, atau QR.
+            - generic [ref=e192]:
+              - generic [ref=e193]: Jaringan
+              - strong [ref=e194]: Lokal
+              - generic [ref=e195]: Wi-Fi atau LAN yang dapat dijangkau.

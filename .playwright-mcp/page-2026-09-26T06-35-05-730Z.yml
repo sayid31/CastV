@@ -1,0 +1,123 @@
+- generic [ref=f1e3]:
+  - banner [ref=f1e4]:
+    - generic [ref=f1e5]:
+      - generic [ref=f1e11]:
+        - text: Cast
+        - emphasis [ref=f1e12]: V
+      - navigation [ref=f1e13]:
+        - button "Fitur" [ref=f1e14] [cursor=pointer]
+        - button "Cara kerja" [ref=f1e15] [cursor=pointer]
+        - button "FAQ" [ref=f1e16] [cursor=pointer]
+      - button "Download" [ref=f1e17] [cursor=pointer]
+  - main [ref=f1e20]:
+    - generic [ref=f1e22]:
+      - generic [ref=f1e23]:
+        - generic [ref=f1e24]: Gratis · Windows · tanpa akun
+        - heading [level=1] [ref=f1e26]:
+          - text: Tampilkan layar PC ke TV
+          - emphasis [ref=f1e27]: tanpa aplikasi tambahan.
+        - paragraph [ref=f1e28]: CastV menemukan TV yang mendukung AirPlay di Wi-Fi yang sama, lalu mengirim layar PC kamu langsung ke sana. Tidak ada install di TV, tidak ada URL, tidak ada QR.
+        - generic [ref=f1e29]:
+          - link "Download untuk Windows Installer .exe · Windows 10/11 x64" [ref=f1e30] [cursor=pointer]:
+            - /url: /downloads/CastV-0.1.0-x64.exe
+            - generic [ref=f1e33]:
+              - strong [ref=f1e34]: Download untuk Windows
+              - generic [ref=f1e35]: Installer .exe · Windows 10/11 x64
+          - link "Versi portable Jalankan tanpa instalasi" [ref=f1e36] [cursor=pointer]:
+            - /url: /downloads/CastV-0.1.0-portable.exe
+            - generic [ref=f1e39]:
+              - strong [ref=f1e40]: Versi portable
+              - generic [ref=f1e41]: Jalankan tanpa instalasi
+        - generic [ref=f1e42]:
+          - generic [ref=f1e43]: Delay beberapa detik
+          - generic [ref=f1e46]: Video H.264 1080p
+          - generic [ref=f1e49]: 100% lokal
+      - generic [ref=f1e52]:
+        - img "Tampilan aplikasi desktop CastV" [ref=f1e54]
+        - generic [ref=f1e55]: Tampilan asli aplikasi CastV untuk Windows
+    - generic [ref=f1e57]:
+      - generic [ref=f1e58]:
+        - generic [ref=f1e59]: Fitur
+        - heading "Semua yang dibutuhkan, tanpa yang tidak." [level=2] [ref=f1e60]
+        - paragraph [ref=f1e61]: "CastV sengaja dibuat fokus: satu tombol untuk mulai, tanpa akun dan tanpa konfigurasi rumit."
+      - generic [ref=f1e62]:
+        - article [ref=f1e63]:
+          - heading "Tanpa aplikasi di TV" [level=3] [ref=f1e68]
+          - paragraph [ref=f1e69]: TV AirPlay langsung terdeteksi. Tidak perlu install, URL, atau scan QR di sisi TV.
+        - article [ref=f1e70]:
+          - heading "100% jaringan lokal" [level=3] [ref=f1e74]
+          - paragraph [ref=f1e75]: Stream berjalan di Wi-Fi atau LAN kamu sendiri. Tidak ada video yang diunggah ke server mana pun.
+        - article [ref=f1e76]:
+          - heading "Privat secara default" [level=3] [ref=f1e81]
+          - paragraph [ref=f1e82]: Tidak ada akun, tidak ada login, tidak ada telemetry. Tutup aplikasi dan stream pun berhenti.
+        - article [ref=f1e83]:
+          - heading "Gratis dan ringan" [level=3] [ref=f1e87]
+          - paragraph [ref=f1e88]: Aplikasi desktop kecil untuk Windows 10/11. Satu file installer, tanpa biaya langganan.
+    - generic [ref=f1e90]:
+      - generic [ref=f1e91]:
+        - generic [ref=f1e92]: Cara kerja
+        - heading "Tiga langkah, selesai." [level=2] [ref=f1e93]
+      - generic [ref=f1e94]:
+        - article [ref=f1e95]:
+          - generic [ref=f1e96]: "01"
+          - heading "Klik Share Screen" [level=3] [ref=f1e97]
+          - paragraph [ref=f1e98]: Buka CastV lalu klik satu tombol Share Screen.
+        - article [ref=f1e99]:
+          - generic [ref=f1e100]: "02"
+          - heading "Pilih perangkat" [level=3] [ref=f1e101]
+          - paragraph [ref=f1e102]: Pilih TV AirPlay yang muncul otomatis di daftar nearby.
+        - article [ref=f1e103]:
+          - generic [ref=f1e104]: "03"
+          - heading "Pilih layar" [level=3] [ref=f1e105]
+          - paragraph [ref=f1e106]: Pilih seluruh layar atau satu window, lalu streaming berjalan.
+    - generic [ref=f1e109]:
+      - generic [ref=f1e110]: Download
+      - heading "Ambil CastV untuk Windows" [level=2] [ref=f1e111]
+      - paragraph [ref=f1e112]: Pilih installer untuk PC, atau versi portable jika tidak ingin memasang apa pun.
+      - generic [ref=f1e113]:
+        - link "Download untuk Windows Installer .exe · Windows 10/11 x64" [ref=f1e114] [cursor=pointer]:
+          - /url: /downloads/CastV-0.1.0-x64.exe
+          - generic [ref=f1e117]:
+            - strong [ref=f1e118]: Download untuk Windows
+            - generic [ref=f1e119]: Installer .exe · Windows 10/11 x64
+        - link "Versi portable Jalankan tanpa instalasi" [ref=f1e120] [cursor=pointer]:
+          - /url: /downloads/CastV-0.1.0-portable.exe
+          - generic [ref=f1e123]:
+            - strong [ref=f1e124]: Versi portable
+            - generic [ref=f1e125]: Jalankan tanpa instalasi
+      - list [ref=f1e126]:
+        - listitem [ref=f1e127]:
+          - generic [ref=f1e128]: Versi
+          - strong [ref=f1e129]: v0.1.0
+        - listitem [ref=f1e130]:
+          - generic [ref=f1e131]: Sistem
+          - strong [ref=f1e132]: Windows 10/11 · x64
+        - listitem [ref=f1e133]:
+          - generic [ref=f1e134]: Ukuran
+          - strong [ref=f1e135]: ± 107 MB
+        - listitem [ref=f1e136]:
+          - generic [ref=f1e137]: Jaringan
+          - strong [ref=f1e138]: Wi-Fi atau LAN lokal
+      - paragraph [ref=f1e139]:
+        - text: Windows SmartScreen mungkin menampilkan peringatan karena installer belum code-signed. Pilih
+        - strong [ref=f1e140]: More info → Run anyway
+        - text: .
+    - generic [ref=f1e142]:
+      - generic [ref=f1e143]:
+        - generic [ref=f1e144]: FAQ
+        - heading "Pertanyaan yang sering muncul." [level=2] [ref=f1e145]
+      - generic [ref=f1e146]:
+        - group [ref=f1e147]:
+          - generic "Apakah TV perlu installing aplikasi?" [ref=f1e148] [cursor=pointer]
+        - group [ref=f1e151]:
+          - generic "Apakah laptop dan TV harus satu Wi-Fi?" [ref=f1e152] [cursor=pointer]
+        - group [ref=f1e155]:
+          - generic "Kenapa ada jeda beberapa detik?" [ref=f1e156] [cursor=pointer]
+        - group [ref=f1e159]:
+          - generic "Apakah audio ikut terkirim ke TV?" [ref=f1e160] [cursor=pointer]
+  - contentinfo [ref=f1e163]:
+    - generic [ref=f1e164]:
+      - generic [ref=f1e170]:
+        - text: Cast
+        - emphasis [ref=f1e171]: V
+      - generic [ref=f1e172]: © 2026 CastV · Dibuat untuk presentasi yang tenang.

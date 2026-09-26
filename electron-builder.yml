@@ -1,0 +1,37 @@
+appId: com.castv.screen-mirror
+productName: CastV
+copyright: Copyright © 2026 CastV
+directories:
+  output: release
+  buildResources: build
+files:
+  - dist/**/*
+  # Landing-page installer downloads are for the website only, not the app bundle.
+  - '!dist/downloads'
+  - '!dist/downloads/**'
+  - electron/**/*
+  - server/**/*
+  - package.json
+  - '!**/*.map'
+asar: true
+compression: maximum
+npmRebuild: false
+win:
+  icon: build/icon.ico
+  target:
+    - target: nsis
+      arch:
+        - x64
+    - target: portable
+      arch:
+        - x64
+  artifactName: CastV-${version}-${arch}.${ext}
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: CastV
+portable:
+  artifactName: CastV-${version}-portable.${ext}

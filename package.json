@@ -1,0 +1,42 @@
+{
+  "name": "castv",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CastV — share your desktop to any browser on the same network.",
+  "author": "CastV",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "concurrently -k -n web,desktop -c cyan,magenta \"vite --host 0.0.0.0\" \"wait-on http://127.0.0.1:5173 && cross-env CASTV_DEV_SERVER_URL=http://127.0.0.1:5173 electron .\"",
+    "build": "tsc --noEmit && vite build",
+    "start": "npm run build && electron .",
+    "web": "npm run build && node server/index.cjs",
+    "dist": "npm run build && electron-builder --win",
+    "dist:dir": "npm run build && electron-builder --win --dir",
+    "discover:cast": "node scripts/discover-devices.cjs",
+    "downloads:sync": "node scripts/sync-downloads.cjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "bonjour-service": "^1.4.4",
+    "bplist-creator": "^0.3.0",
+    "bplist-parser": "^0.5.0",
+    "qrcode": "^1.5.4",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.21",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "@vitejs/plugin-react": "^4.4.1",
+    "concurrently": "^9.1.2",
+    "cross-env": "^7.0.3",
+    "electron": "^44.4.5",
+    "electron-builder": "^26.15.3",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5",
+    "wait-on": "^8.0.3"
+  }
+}

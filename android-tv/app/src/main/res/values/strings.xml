@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CastV TV</string>
+    <string name="tv_title">CastV Receiver</string>
+    <string name="searching">Mencari CastV di Wi-Fi…</string>
+    <string name="manual_hint">PC IP (opsional)</string>
+    <string name="manual_connect">Hubungkan manual</string>
+    <string name="search_again">Cari lagi</string>
+</resources>
