@@ -25,7 +25,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
@@ -56,14 +56,17 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
         run: npm ci
 
       - name: Build installer
-        run: npm run dist
+        # --publish never: electron-builder auto-detects CI and would try to
+        # publish on its own (then fail without a GH_TOKEN). CI only packages;
+        # releasing is handled by release.yml.
+        run: npm run dist -- --publish never
         env:
           # Optional code-signing. When these secrets are absent the build
           # simply produces an unsigned installer (no failure).
