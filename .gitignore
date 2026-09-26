@@ -11,3 +11,5 @@ android-tv/app/build/
 android-tv/*.apk
 
 .vercel
+
+.playwright-mcp/
