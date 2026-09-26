@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag yang akandirilis (contoh: v0.2.0)'
+        description: 'Tag yang akan dirilis (contoh: v0.2.0)'
         required: true
 
 permissions:
@@ -54,8 +54,8 @@ jobs:
         run: npm ci
 
       - name: Build installer
-        # --publish never: we publish through `gh release create` below so the
-        # release notes and asset list stay under our control.
+        # --publish never: we publish through `gh` below so the asset names
+        # and release notes stay under our control.
         run: npm run dist -- --publish never
         env:
           CSC_LINK: ${{ secrets.CSC_LINK }}
@@ -66,7 +66,8 @@ jobs:
         run: |
           $expected = @(
             "release/CastV-${{ steps.meta.outputs.version }}-x64.exe",
-            "release/CastV-${{ steps.meta.outputs.version }}-portable.exe"
+            "release/CastV-${{ steps.meta.outputs.version }}-portable.exe",
+            "release/CastV-${{ steps.meta.outputs.version }}-x64.exe.blockmap"
           )
           $missing = $expected | Where-Object { -not (Test-Path $_) }
           if ($missing) {
@@ -78,12 +79,11 @@ jobs:
             Write-Output "  $_ ($mb MB)"
           }
 
-      - name: Publish GitHub Release
+      - name: Create release
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ steps.meta.outputs.tag }}
-          VERSION: ${{ steps.meta.outputs.version }}
           REPO: ${{ github.repository }}
         run: |
           $notes = @"
@@ -91,8 +91,8 @@ jobs:
 
           ### Download untuk Windows
 
-          - **Installer (NSIS)** - https://github.com/$env:REPO/releases/latest/download/CastV-$env:VERSION-x64.exe
-          - **Portable** (tanpa instalasi) - https://github.com/$env:REPO/releases/latest/download/CastV-$env:VERSION-portable.exe
+          - **Installer (NSIS)** - https://github.com/$env:REPO/releases/latest/download/CastV-latest-x64.exe
+          - **Portable** (tanpa instalasi) - https://github.com/$env:REPO/releases/latest/download/CastV-latest-portable.exe
 
           ### Catatan
 
@@ -101,12 +101,58 @@ jobs:
           - Jalur AirPlay mengirim video HLS dengan delay beberapa detik. Jalur browser memakai WebRTC.
           "@
 
-          gh release create $env:TAG `
-            "release/CastV-$env:VERSION-x64.exe" `
-            "release/CastV-$env:VERSION-portable.exe" `
-            "release/CastV-$env:VERSION-x64.exe.blockmap" `
-            --title "CastV $env:TAG" `
-            --notes $notes
+          # Skip if a release for this tag already exists (re-run on same tag).
+          $existing = gh api "repos/$env:REPO/releases/tags/$env:TAG" --silent 2>$null
+          if ($LASTEXITCODE -eq 0) {
+            Write-Output "Release untuk $env:TAG sudah ada, Made reuse."
+            gh release edit $env:TAG --title "CastV $env:TAG" --notes $notes
+          } else {
+            gh release create $env:TAG --title "CastV $env:TAG" --notes $notes --verify-tag
+            if ($LASTEXITCODE -ne 0) { throw "Gagal membuat release $env:TAG" }
+          }
+          "Release $env:TAG siap."
+
+      - name: Upload assets (stable names)
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.meta.outputs.tag }}
+          VERSION: ${{ steps.meta.outputs.version }}
+          REPO: ${{ github.repository }}
+        run: |
+          $releaseId = gh api "repos/$env:REPO/releases/tags/$env:TAG" --jq .id
+          if (-not $releaseId) { throw "Release id tidak ditemukan untuk $env:TAG" }
+
+          # Asset names intentionally carry no version number, so the landing
+          # page URL `releases/latest/download/CastV-latest-x64.exe` keeps
+          # working forever - no redeploy needed on every release.
+          $assets = @(
+            @{ src = "release/CastV-$env:VERSION-x64.exe";         name = "CastV-latest-x64.exe" }
+            @{ src = "release/CastV-$env:VERSION-portable.exe";    name = "CastV-latest-portable.exe" }
+            @{ src = "release/CastV-$env:VERSION-x64.exe.blockmap"; name = "CastV-latest-x64.exe.blockmap" }
+          )
+
+          foreach ($a in $assets) {
+            if (-not (Test-Path $a.src)) { throw "File tidak ada: $($a.src)" }
+            Write-Output "Mengupload $($a.name)..."
+            gh api --method POST `
+              -H "Content-Type: application/octet-stream" `
+              --input $a.src `
+              "repos/$env:REPO/releases/$releaseId/assets?name=$($a.name)" `
+              --silent
+            if ($LASTEXITCODE -ne 0) { throw "Gagal mengupload $($a.src)" }
+            $mb = [math]::Round((Get-Item $a.src).Length / 1MB, 1)
+            Write-Output "  OK $($a.name) ($mb MB)"
+          }
+
+      - name: Summarise
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          TAG: ${{ steps.meta.outputs.tag }}
+        run: |
+          gh api "repos/$env:REPO/releases/tags/$env:TAG" --jq '.html_url, (.assets[] | "  \(.name)  \(.size / 1048576 | floor) MB")'
 
       - name: Upload installer artifacts
         uses: actions/upload-artifact@v4

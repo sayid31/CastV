@@ -137,12 +137,16 @@ Installer (`.exe`, ±107 MB) **tidak** di-host di Vercel karena limit static fil
 ```
 Landing page (Vercel)  →  tombol download
         ↓
-GitHub Release         →  file CastV-x64.exe & CastV-portable.exe
+GitHub Release         →  CastV-latest-x64.exe & CastV-latest-portable.exe
 ```
 
-Link download memakai pola stabil `releases/latest/download/<nama-file>` yang selalu menunjuk release terbaru, jadi tidak perlu diubah tiap versi. Repo & release harus **public** agar link bisa diakses orang banyak.
+Asset dipublish dengan nama **stabil tanpa nomor versi** (`CastV-latest-x64.exe`). Konsekuensinya:
 
-> Source code juga menjadi publik karena repo-nya public. Kalau nanti butuh kode tetap private, pindahkan file installer ke layanan file storage terpisah dan ganti `DOWNLOAD` di `src/landing.tsx`.
+- `releases/latest/download/CastV-latest-x64.exe` **tidak pernah rusak**, berapa pun rilis yang terbit
+- Landing page **tidak perlu di-deploy ulang** setiap ada versi baru
+- Tautan arsip ke rilis tertentu tetap valid: `releases/download/v0.2.0/CastV-latest-x64.exe`
+
+> Repo harus **public** agar link bisa diakses orang banyak. Kalau nanti butuh kode tetap private, pindahkan file installer ke layanan file storage terpisah dan ganti konstanta `DOWNLOAD` di `src/landing.tsx`.
 
 ### Menerbitkan release baru
 

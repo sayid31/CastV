@@ -7,15 +7,17 @@ import './landing.css';
  * Repository GitHub yang menampung source code dan Release installer.
  * Ubah hanya bagian "owner/nama-repo" bila repo kamu berbeda.
  *
- * Link download memakai pola `releases/latest/download/<file>` yang selalu
- * menunjuk ke release terbaru, jadi tidak perlu diubah setiap versi.
+ * Link download memakai nama asset stabil `CastV-latest-<target>.exe`.
+ * Nama itu sengaja tidak memuat nomor versi: begitu rilis baru terbit,
+ * link yang sama otomatis menunjuk ke installer terbaru dan tidak pernah
+ * rusak - landing page juga tidak perlu di-deploy ulang.
  */
 const GITHUB_REPO = 'sayid31/CastV';
 
 const DOWNLOAD = {
   version: __APP_VERSION__,
-  installer: `https://github.com/${GITHUB_REPO}/releases/latest/download/CastV-${__APP_VERSION__}-x64.exe`,
-  portable: `https://github.com/${GITHUB_REPO}/releases/latest/download/CastV-${__APP_VERSION__}-portable.exe`,
+  installer: `https://github.com/${GITHUB_REPO}/releases/latest/download/CastV-latest-x64.exe`,
+  portable: `https://github.com/${GITHUB_REPO}/releases/latest/download/CastV-latest-portable.exe`,
 };
 
 const FEATURES = [
