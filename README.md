@@ -1,264 +1,222 @@
+<div align="center">
+
+<img src="docs/logo.svg" width="72" alt="CastV logo" />
+
 # CastV
 
-Aplikasi desktop untuk menampilkan layar PC ke TV AirPlay atau browser di jaringan lokal.
+**Tampilkan layar PC ke TV tanpa aplikasi tambahan.**
 
-| | |
-| --- | --- |
-| **Repository** | https://github.com/sayid31/CastV |
-| **Landing page** | https://castv.vercel.app |
-| **Download** | https://github.com/sayid31/CastV/releases/latest |
+Klik satu tombol, TV langsung terdeteksi, layar kamu flowing ke sana.
+Tanpa install di TV. Tanpa URL. Tanpa QR.
 
-## Struktur halaman
+[![CI](https://github.com/sayid31/CastV/actions/workflows/ci.yml/badge.svg)](https://github.com/sayid31/CastV/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/sayid31/CastV?label=release&color=orange)](https://github.com/sayid31/CastV/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/sayid31/CastV/total?label=downloads&color=green)](https://github.com/sayid31/CastV/releases)
+[![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11%20x64-0078D4?logo=windows&logoColor=white)](https://github.com/sayid31/CastV/releases/latest)
+[![License](https://img.shields.io/badge/license-see%20repo-8B7355)](#lisensi)
+[![Made with](https://img.shields.io/badge/stack-Electron%20%2B%20React%20%2B%20Vite-646464)](https://github.com/sayid31/CastV)
 
-Build ini menghasilkan tiga halaman terpisah:
+[🌐 Landing page](https://castv-woad.vercel.app) · [⬇️ Download](https://github.com/sayid31/CastV/releases/latest) · [🐛 Laporkan bug](https://github.com/sayid31/CastV/issues)
 
-| Halaman | File | Dipakai siapa |
-| --- | --- | --- |
-| **Landing page** | `index.html` | Situs publik (deploy ke Vercel) — pengenalan + download |
-| **Desktop app** | `app.html` | Jendela Electron di laptop — satu tombol **Share Screen** |
-| **Web receiver** | `receiver.html` | HP, tablet, atau Android TV |
+</div>
 
-Desktop app sengaja dibuat satu layar: tidak ada menu, sidebar, atau halaman tambahan. Satu tombol **Share Screen** adalah satu-satunya aksi utama.
+---
 
-## Menjalankan di Windows
+## 📸 Tampilan
+
+<div align="center">
+  <img src="docs/screenshot-app.png" width="820" alt="Aplikasi desktop CastV" />
+  <br /><br />
+  <img src="docs/screenshot-device-picker.png" width="620" alt="Dialog pilih perangkat receiver" />
+</div>
+
+<div align="center">
+  <img src="docs/screenshot-landing.png" width="820" alt="Landing page CastV" />
+  <br />
+  <sub>Landing page publik CastV</sub>
+</div>
+
+---
+
+## 🤔 Kenapa CastV?
+
+Berbagi layar biasanya butuh salah satu dari ini:
+
+- **install aplikasi** di TV
+- **kirim URL** yang harus diketik manual
+- **scan QR** dari HP
+- **kabel**
+
+CastV menghilangkan semua itu. TV yang mendukung AirPlay akan **muncul otomatis** di daftar perangkat begitu CastV dibuka — lewat mDNS, bukan karena kamu mengetik apa pun.
+
+```text
+Share Screen  →  pilih TV  →  pilih layar  →  streaming
+```
+
+---
+
+## ✨ Fitur
+
+| | Fitur |
+|---|---|
+| 📺 | **Tanpa aplikasi di TV** — cukup AirPlay bawaan |
+| 🛰️ | **Auto-discovery** — TV & browser receiver terdeteksi via mDNS |
+| 🎥 | **Pilihan sumber** — seluruh layar atau satu window aplikasi |
+| 🔒 | **100% lokal** — tidak ada akun, tidak ada upload, tidak ada telemetry |
+| 💻 | **Desktop app** — satu layar, satu tombol, tanpa menu berlapis |
+| 🖥️ | **Web receiver** — HP, tablet, atau laptop kedua |
+| 📦 | **Installer & portable** — file tunggal, tanpa dependency tambahan |
+| 🆓 | **Gratis** — tidak ada biaya langganan |
+
+---
+
+## 🚀 Cara pakai
+
+### Untuk pengguna akhir
+
+1. Unduh installer dari [halaman release](https://github.com/sayid31/CastV/releases/latest)
+2. Jalankan `CastV-latest-x64.exe` (atau `CastV-latest-portable.exe` tanpa instalasi)
+3. Pastikan Windows Firewall mengizinkan CastV pada **Private network**
+4. Klik **Share Screen** → pilih TV → pilih layar
+
+> Installer belum code-signed, jadi Windows SmartScreen bisa menampilkan peringatan.
+> Pilih **More info → Run anyway**.
+
+### Untuk developers
 
 ```bash
+git clone https://github.com/sayid31/CastV.git
+cd CastV
 npm install
 npm run dev
 ```
 
-`npm run dev` akan menjalankan Vite dan membuka jendela CastV di `app.html`. Pastikan Windows Firewall mengizinkan aplikasi pada **Private network** saat diminta.
+`npm run dev` membuka Vite + jendela CastV di `app.html`.
 
-Alamat lokal saat development:
+| URL | Halaman |
+|---|---|
+| `http://127.0.0.1:5173/` | Landing page |
+| `http://127.0.0.1:5173/app.html` | Desktop app |
+| `http://127.0.0.1:5173/receiver.html` | Web receiver |
 
-```text
-http://127.0.0.1:5173/            → landing page
-http://127.0.0.1:5173/app.html    → desktop app
-http://127.0.0.1:5173/receiver.html → web receiver
-```
+---
 
-### Share ke TV AirPlay
-
-1. Pastikan TV menyala dan CastV berjalan di laptop.
-2. Klik **Share Screen**.
-3. Pilih TV AirPlay yang muncul otomatis di dialog perangkat.
-4. Pilih layar atau window.
-5. Tunggu status **Sedang streaming**.
-
-Tidak ada URL, QR, atau aplikasi CastV yang perlu dibuka di TV. Jalur ini memakai HLS kompatibel dengan AirPlay 1 dan dapat memiliki delay beberapa detik.
-
-### Share ke browser / HP
-
-1. Klik **Share Screen** di CastV.
-2. Di perangkat kedua, buka `http://<IP-LAN-PC>:43117/receiver.html`.
-3. Browser akan muncul otomatis di dialog **Pilih perangkat receiver**.
-4. Pilih device, lalu klik **Lanjut pilih layar**.
-
-Browser receiver masih harus membuka halaman receiver terlebih dahulu agar dapat terlihat oleh CastV. Untuk TV AirPlay, CastV melakukan discovery langsung melalui mDNS.
-
-## Deteksi receiver bawaan (AirPlay/Google Cast)
-
-Untuk memeriksa TV yang tidak membutuhkan CastV receiver, jalankan:
-
-```bash
-npm run discover:cast
-```
-
-Scan mencari service mDNS `_airplay._tcp`, `_raop._tcp`, `_googlecast._tcp`, dan DLNA. Tambahkan `--probe-airplay` untuk melakukan probe `/info` pada device AirPlay:
-
-```bash
-node scripts/discover-devices.cjs --probe-airplay
-```
-
-Xiaomi TV yang mendukung AirPlay akan muncul sebagai `AirPlay`/`RAOP` bersama hostname, IP, dan port. Jalur ini tidak memerlukan URL, QR, atau aplikasi CastV di TV.
-
-## Android TV receiver
-
-Target utama berikutnya adalah Android TV / Google TV. Receiver native sekarang memakai UDP discovery di port `43118`, lalu membuka halaman receiver CastV secara internal—jadi tidak perlu lagi menyalin URL atau scan QR.
-
-Build APK debug di Windows:
-
-```powershell
-$env:JAVA_HOME='C:\Program Files\Android\Android Studio\jbr'
-.\android-tv\gradlew.bat -p android-tv assembleDebug --no-daemon
-```
-
-APK hasil build:
+## 🏗️ Arsitektur
 
 ```text
-android-tv/app/build/outputs/apk/debug/app-debug.apk
+┌─────────────────────── Laptop (sender) ────────────────────────┐
+│                                                               │
+│  Electron main process                                       │
+│    ├── server HTTP + WebSocket  (port 43117)                  │
+│    ├── mDNS discovery  (_airplay._tcp / _raop._tcp)          │
+│    └── AirPlay /play client (HLS)                             │
+│                                                               │
+│  Renderer                                                     │
+│    ├── getDisplayMedia() ──► WebCodecs H.264                  │
+│    │        │                                                 │
+│    │        ├──► fMP4 muxer ──► HLS segmenter ──┐            │
+│    │        │                                    │            │
+│    │        └──► RTCPeerConnection (WebRTC)     │            │
+│    └────────────────────────────────────────────┼────────────┘
+└─────────────────────────────────────────────────┼────────────┘
+                                                  │
+                    ┌─────────────────────────────┴──────────┐
+                    ▼                                        ▼
+            TV AirPlay (HLS)                      Browser receiver
+            delay beberapa detik                 WebRTC langsung
+            tanpa app di sisi TV                  HTTP LAN
 ```
 
-Salinan APK siap pakai juga tersedia di:
+### Tiga jalur output
+
+| Jalur | Protokol | Kecepatan | Catatan |
+|---|---|---|---|
+| **TV AirPlay** | HLS / HTTP | delay beberapa detik | Video-only, 1080p30, ~5 Mbps |
+| **Browser receiver** | WebRTC | sangat cepat | Butuh halaman receiver terbuka |
+| **Android TV** | WebView + WebRTC | sangat cepat | Experimental, via `android-tv/` |
+
+### Struktur repository
 
 ```text
-android-tv/CastV-TV-debug.apk
+app.html              Halaman desktop app
+index.html            Landing page publik
+receiver.html         Web receiver
+electron/             Main process, AirPlay client, mDNS discovery
+server/               HTTP + WebSocket + UDP discovery
+src/lib/airplay/      Pipeline WebCodecs, muxer fMP4, segmenter HLS
+android-tv/           Receiver native Android TV (eksperimental)
+docs/                 Screenshot untuk README
 ```
 
-Pasang ke Android TV/ emulator dengan:
+---
 
-```powershell
-adb install -r android-tv/app/build/outputs/apk/debug/app-debug.apk
-```
+## ⚠️ Batasan yang perlu diketahui
 
-Saat CastV berjalan di PC dan TV berada pada Wi-Fi yang sama, aplikasi TV akan mencari sender secara otomatis. Kolom IP manual tetap tersedia jika administrator jaringan memblokir broadcast UDP.
+Jujur soal ini, karena lebih baik diketahui sekarang:
 
-## Build installer Windows
+- **AirPlay HLS menambah delay beberapa detik.** Ini bukan real-time. Receiver browser (WebRTC) jauh lebih cepat.
+- **Jalur AirPlay belum mengirim audio.** Hanya video. Dukungan audio direncanakan untuk rilis berikutnya.
+- **TV harus mendukung AirPlay** (atau receiver native Android TV). Google Cast bawaan belum jadi jalur utama.
+- **AirPlay 2 / HAP pairing belum didukung** — perangkat yang meminta pairing difilter dari daftar.
+- **Belum code-signed**, jadi SmartScreen menampilkan peringatan.
+- **Windows x64 saja** untuk installer resmi.
+- **Wi-Fi dengan client isolation / VPN / firewall ketat** bisa menghalangi discovery.
+- Preview lokal **tidak pernah direkam atau disimpan**.
 
-Untuk membuat installer yang bisa dipakai laptop lain:
+---
+
+## 🛠️ Scripts
+
+| Script | Fungsi |
+|---|---|
+| `npm run dev` | Vite + Electron dalam mode pengembangan |
+| `npm run build` | Typecheck + build ketiga halaman ke `dist/` |
+| `npm run dist` | Build installer Windows + portable |
+| `npm run typecheck` | TypeScript check tanpa emit |
+| `npm run web` | Jalankan server statis tanpa Electron |
+| `npm run discover:cast` | Scan mDNS untuk mencari perangkat AirPlay/Cast |
+| `npm run downloads:sync` | Salin installer ke `public/downloads/` untuk testing lokal |
+
+---
+
+## 🚢 Rilis
 
 ```bash
-npm run dist
+npm version 0.2.0
+git push && git push --follow-tags
 ```
 
-File hasil berada di:
+GitHub Actions otomatis: typecheck → build → package → GitHub Release.
 
-```text
-release/CastV-0.1.0-x64.exe
-release/CastV-0.1.0-portable.exe
-```
+Link download memakai nama asset stabil (`CastV-latest-x64.exe`), jadi
+**tidak pernah rusak** dan landing page tidak perlu di-deploy ulang tiap rilis.
 
-- File `x64.exe` adalah installer NSIS.
-- File `portable.exe` bisa dijalankan tanpa instalasi.
-- Untuk build tanpa installer, gunakan `npm run dist:dir`.
+| Workflow | Trigger | Fungsi |
+|---|---|---|
+| `ci.yml` | push / PR | Typecheck, build, package installer |
+| `release.yml` | tag `v*` | Build + publikasi GitHub Release |
 
-Installer sudah membawa Vite build, Electron main process, server lokal, dan dependency production. Pengguna laptop lain hanya perlu menjalankan CastV; tidak perlu clone repository atau `npm install`. Jalankan `CastV-0.1.0-x64.exe` untuk instalasi, atau `CastV-0.1.0-portable.exe` tanpa instalasi. Pastikan Windows Firewall mengizinkan CastV pada **Private network** saat pertama kali dibuka.
+---
 
-Karena installer MVP belum ditandatangani secara code-sign, Windows SmartScreen dapat menampilkan peringatan. Untuk penggunaan internal, pilih **More info → Run anyway**; untuk distribusi publik, tambahkan code-signing certificate.
+## 🌐 Deploy
 
-## Landing page publik
+Landing page dikonfigurasi lewat `vercel.json` (static site, output `dist`).
+File installer **tidak** ikut di-deploy karena limit Vercel Hobby 100 MB —
+artefaknya ditaruh di GitHub Release.
 
-Landing page ada di `index.html` dan di-build sebagai static site untuk Vercel. Config deploy sudah tersedia di `vercel.json` (build command `npm run build`, output `dist`).
+---
 
-### Konsep distribusi installer
+## 📄 Lisensi
 
-Installer (`.exe`, ±107 MB) **tidak** di-host di Vercel karena limit static file upload Hobby hanya 100 MB. Sebagai gantinya:
+Belum ada lisensi yang ditetapkan. Semua hak cipta dilindungi sampai lisensi
+dipilih. Kalau ingin kontribusi, buka issue dulu untuk berdiskusi.
 
-```
-Landing page (Vercel)  →  tombol download
-        ↓
-GitHub Release         →  CastV-latest-x64.exe & CastV-latest-portable.exe
-```
+---
 
-Asset dipublish dengan nama **stabil tanpa nomor versi** (`CastV-latest-x64.exe`). Konsekuensinya:
+<div align="center">
 
-- `releases/latest/download/CastV-latest-x64.exe` **tidak pernah rusak**, berapa pun rilis yang terbit
-- Landing page **tidak perlu di-deploy ulang** setiap ada versi baru
-- Tautan arsip ke rilis tertentu tetap valid: `releases/download/v0.2.0/CastV-latest-x64.exe`
+**CastV** — dibuat untuk presentasi yang tenang.
 
-> Repo harus **public** agar link bisa diakses orang banyak. Kalau nanti butuh kode tetap private, pindahkan file installer ke layanan file storage terpisah dan ganti konstanta `DOWNLOAD` di `src/landing.tsx`.
+Made with ☕ using Electron, React, Vite, dan WebCodecs
 
-### Menerbitkan release baru
-
-Nomor versi dibaca dari satu sumber: `package.json`. Workflow otomatis mengambilnya dari tag Git.
-
-```bash
-# 1. bump versi
-npm version 0.2.0        # menulis package.json + package-lock.json
-
-# 2. commit & push
-git add -A
-git commit -m "release: v0.2.0"
-git push
-
-# 3. buat tag -> memicu workflow Release otomatis
-git tag v0.2.0
-git push origin v0.2.0
-```
-
-GitHub Actions (`release.yml`) lalu otomatis:
-
-1. Membaca versi dari tag (`v0.2.0` → `0.2.0`) dan menyinkronkan `package.json`
-2. Build frontend + installer Windows (`npm run dist`)
-3. Verifikasi kedua file `.exe` benar-benar ada
-4. Membuat GitHub Release beserta asset-nya
-5. Upload artifact ke workflow run
-
-Karena versi ikut di-*inject* ke landing page saat build, nama file di release selalu cocok dengan link download — tidak ada yang perlu diedit manual.
-
-> `npm version 0.2.0` sudah membuat commit **dan** tag secara otomatis,
-> jadi cukup `git push && git push --follow-tags`.
-
-### Workflow yang tersedia
-
-| File | Trigger | Fungsi |
-| --- | --- | --- |
-| `.github/workflows/ci.yml` | push / pull request | Typecheck, build, dan package installer sebagai artifact |
-| `.github/workflows/release.yml` | push tag `v*` | Build + publikasi GitHub Release |
-
-### Code signing (opsional)
-
-Installer MVP belum ditandatangani. Untuk menandatangani, tambahkan repository secrets:
-
-| Secret | Isi |
-| --- | --- |
-| `CSC_LINK` | Path ke file `.pfx` (base64) atau URL ke sertifikat |
-| `CSC_KEY_PASSWORD` | Password sertifikat |
-
-Kalau secret tersebut belum diisi, build tetap berjalan dan menghasilkan installer unsigned.
-
-### Deploy landing page ke Vercel
-
-Dua cara:
-
-1. **Git integration (disarankan, tanpa secret)** — connect repo `sayid31/CastV` di dashboard Vercel dengan branch `master`. Setiap push otomatis deploy.
-2. **Vercel CLI dari lokal** — `vercel --prod --yes --name castv`
-
-Config build sudah tersimpan di `vercel.json`, dan `.vercelignore` memastikan installer `.exe` tidak ikut ter-upload.
-
-### Script sinkronisasi installer (opsional)
-
-`npm run downloads:sync` menyalin installer dari `release/` ke `public/downloads/` untuk testing lokal landing page dengan file self-hosted. Folder ini tidak di-*commit* dan tidak ikut ke deployment Vercel maupun paket installer aplikasi.
-
-## Menjalankan versi web saja
-
-```bash
-npm run web
-```
-
-Perintah ini membangun frontend dan menjalankan signaling/static server tanpa Electron. Untuk demo desktop, `npm run dev` adalah opsi yang lebih lengkap.
-
-Untuk build produksi lokal:
-
-```bash
-npm start
-```
-
-## Arsitektur MVP
-
-```text
-Electron renderer
-  ├─ getDisplayMedia() → WebRTC → browser receiver
-  └─ getDisplayMedia() → H.264/fMP4 → local HLS → AirPlay TV
-
-Electron main process
-  ├─ local HTTP/WebSocket server (port 43117)
-  ├─ mDNS AirPlay/Google Cast discovery
-  └─ AirPlay /play client
-```
-
-- Room code acak 6 karakter.
-- Token viewer acak 32 byte disimpan pada URL fragment, bukan query string.
-- Satu sender dan satu receiver per room.
-- ICE lokal tanpa STUN/TURN untuk MVP.
-- Preview lokal tidak disimpan atau direkam.
-- Desktop menampilkan source picker CastV sendiri dengan thumbnail layar/window, bukan dialog native Windows.
-
-## Batasan yang diketahui
-
-- Installer Windows tersedia melalui `npm run dist`, tetapi belum ditandatangani secara kriptografi (code-sign) dan belum dipublikasi ke storefront. Untuk MVP, jalankan installer atau build dari source.
-- Mode ini memakai HTTP lokal. Untuk distribusi ke jaringan publik, tambahkan HTTPS/WSS dan certificate trust strategy.
-- Jalur AirPlay HLS berada di atas HTTP lokal dan biasanya memiliki delay beberapa detik; ini bukan mirroring real-time.
-- Jalur AirPlay saat ini mengirim video saja. Audio sistem belum ikut dimux ke HLS.
-- Audio pada WebRTC/browser mengikuti Chromium, OS, dan sumber capture. Jika system audio tidak tersedia, video tetap dapat dikirim.
-- Wi-Fi dengan client isolation, VPN, atau firewall ketat dapat menghalangi WebRTC. TURN/relay adalah tahap berikutnya.
-- QR code dibuat langsung oleh CastV; gunakan kamera HP atau pemindai QR browser.
-
-## Struktur
-
-```text
-electron/       Electron main process
-server/         HTTP static server + WebSocket signaling + UDP discovery
-src/            React sender and receiver pages
-android-tv/     Native Android TV receiver (WebView + UDP discovery)
-```
+</div>
