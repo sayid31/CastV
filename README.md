@@ -65,7 +65,7 @@ Share Screen  →  pilih TV  →  pilih layar  →  streaming
 | 🔒 | **100% lokal** — tidak ada akun, tidak ada upload, tidak ada telemetry |
 | 💻 | **Desktop app** — satu layar, satu tombol, tanpa menu berlapis |
 | 🖥️ | **Web receiver** — HP, tablet, atau laptop kedua |
-| 📦 | **Installer & portable** — file tunggal, tanpa dependency tambahan |
+| 📦 | **Installer tunggal** — satu file .exe, tanpa dependency tambahan |
 | 🆓 | **Gratis** — tidak ada biaya langganan |
 
 ---
@@ -75,7 +75,7 @@ Share Screen  →  pilih TV  →  pilih layar  →  streaming
 ### Untuk pengguna akhir
 
 1. Unduh installer dari [halaman release](https://github.com/sayid31/CastV/releases/latest)
-2. Jalankan `CastV-latest-x64.exe` (atau `CastV-latest-portable.exe` tanpa instalasi)
+2. Jalankan `CastV-latest-x64.exe`
 3. Pastikan Windows Firewall mengizinkan CastV pada **Private network**
 4. Klik **Share Screen** → pilih TV → pilih layar
 
@@ -172,7 +172,7 @@ Jujur soal ini, karena lebih baik diketahui sekarang:
 | `npm run dev` | Vite + Electron dalam mode pengembangan |
 | `npm run build` | Typecheck + build ketiga halaman ke `dist/` (untuk Electron) |
 | `npm run build:site` | Build landing page saja ke `dist-site/` (untuk Vercel) |
-| `npm run dist` | Build installer Windows + portable |
+| `npm run dist` | Build installer Windows |
 | `npm run typecheck` | TypeScript check tanpa emit |
 | `npm run web` | Jalankan server statis tanpa Electron |
 | `npm run discover:cast` | Scan mDNS untuk mencari perangkat AirPlay/Cast |

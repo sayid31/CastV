@@ -66,7 +66,6 @@ jobs:
         run: |
           $expected = @(
             "release/CastV-${{ steps.meta.outputs.version }}-x64.exe",
-            "release/CastV-${{ steps.meta.outputs.version }}-portable.exe",
             "release/CastV-${{ steps.meta.outputs.version }}-x64.exe.blockmap"
           )
           $missing = $expected | Where-Object { -not (Test-Path $_) }
@@ -92,7 +91,6 @@ jobs:
           ### Download untuk Windows
 
           - **Installer (NSIS)** - https://github.com/$env:REPO/releases/latest/download/CastV-latest-x64.exe
-          - **Portable** (tanpa instalasi) - https://github.com/$env:REPO/releases/latest/download/CastV-latest-portable.exe
 
           ### Catatan
 
@@ -128,7 +126,6 @@ jobs:
           # working forever - no redeploy needed on every release.
           $assets = @(
             @{ src = "release/CastV-$env:VERSION-x64.exe";         name = "CastV-latest-x64.exe" }
-            @{ src = "release/CastV-$env:VERSION-portable.exe";    name = "CastV-latest-portable.exe" }
             @{ src = "release/CastV-$env:VERSION-x64.exe.blockmap"; name = "CastV-latest-x64.exe.blockmap" }
           )
 

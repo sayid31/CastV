@@ -22,9 +22,6 @@ win:
     - target: nsis
       arch:
         - x64
-    - target: portable
-      arch:
-        - x64
   artifactName: CastV-${version}-${arch}.${ext}
 nsis:
   oneClick: false
@@ -33,5 +30,3 @@ nsis:
   createDesktopShortcut: true
   createStartMenuShortcut: true
   shortcutName: CastV
-portable:
-  artifactName: CastV-${version}-portable.${ext}

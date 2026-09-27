@@ -17,7 +17,6 @@ const GITHUB_REPO = 'sayid31/CastV';
 const DOWNLOAD = {
   version: __APP_VERSION__,
   installer: `https://github.com/${GITHUB_REPO}/releases/latest/download/CastV-latest-x64.exe`,
-  portable: `https://github.com/${GITHUB_REPO}/releases/latest/download/CastV-latest-portable.exe`,
 };
 
 const FEATURES = [
@@ -36,7 +35,7 @@ const STEPS = [
 const FAQ = [
   { q: 'Apakah CastV bisa dipakai langsung dari browser?', a: 'Tidak. CastV adalah aplikasi desktop untuk Windows karena perlu akses capture layar dan AirPlay bawaan sistem. Situs ini hanya untuk mengunduh aplikasinya.' },
   { q: 'Apakah TV perlu installing aplikasi?', a: 'Tidak. CastV memakai AirPlay bawaan TV. Yang perlu diinstal hanya CastV di laptop.' },
-  { q: 'Berapa besar file yang diunduh?', a: 'Sekitar 107 MB untuk installer Windows, dan 107 MB untuk versi portable. Keduanya satu file, tanpa dependency tambahan.' },
+  { q: 'Berapa besar file yang diunduh?', a: 'Sekitar 107 MB untuk installer Windows. Satu file, tanpa dependency tambahan.' },
   { q: 'Apakah laptop dan TV harus satu Wi-Fi?', a: 'Sebaiknya satu jaringan lokal atau jaringan yang saling bisa dijangkau agar perangkat ditemukan otomatis.' },
   { q: 'Kenapa ada jeda beberapa detik?', a: 'Jalur TV memakai AirPlay HLS yang menambahkan buffering di sisi TV. Jalur browser (WebRTC) jauh lebih cepat.' },
   { q: 'Apakah audio ikut terkirim ke TV?', a: 'Belum pada versi ini. Jalur AirPlay baru mengirim video. Dukungan audio direncanakan untuk pembaruan berikutnya.' },
@@ -54,13 +53,6 @@ function DownloadButtons({ compact = false }: { compact?: boolean }) {
         <span>
           <strong>Download untuk Windows</strong>
           <small>Installer .exe · Windows 10/11 x64</small>
-        </span>
-      </a>
-      <a className="dl-btn" href={DOWNLOAD.portable} download>
-        <Icon name="spark" size={18} />
-        <span>
-          <strong>Versi portable</strong>
-          <small>Jalankan tanpa instalasi</small>
         </span>
       </a>
     </div>
@@ -157,7 +149,7 @@ function App() {
             <div className="download-card">
               <span className="kicker kicker-light">Download</span>
               <h2>Ambil CastV untuk Windows</h2>
-              <p>Pilih installer untuk PC, atau versi portable jika tidak ingin memasang apa pun.</p>
+              <p>Unduh installer untuk PC, jalankan sekali, lalu CastV langsung siap dipakai.</p>
               <DownloadButtons compact />
               <ul className="requirements">
                 <li><span>Versi</span><strong>v{DOWNLOAD.version}</strong></li>
