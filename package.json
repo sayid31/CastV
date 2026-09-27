@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "concurrently -k -n web,desktop -c cyan,magenta \"vite --host 0.0.0.0\" \"wait-on http://127.0.0.1:5173 && cross-env CASTV_DEV_SERVER_URL=http://127.0.0.1:5173 electron .\"",
     "build": "tsc --noEmit && vite build",
+    "build:site": "tsc --noEmit && vite build --config vite.site.config.ts",
     "start": "npm run build && electron .",
     "web": "npm run build && node server/index.cjs",
     "dist": "npm run build && electron-builder --win",

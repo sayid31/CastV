@@ -170,7 +170,8 @@ Jujur soal ini, karena lebih baik diketahui sekarang:
 | Script | Fungsi |
 |---|---|
 | `npm run dev` | Vite + Electron dalam mode pengembangan |
-| `npm run build` | Typecheck + build ketiga halaman ke `dist/` |
+| `npm run build` | Typecheck + build ketiga halaman ke `dist/` (untuk Electron) |
+| `npm run build:site` | Build landing page saja ke `dist-site/` (untuk Vercel) |
 | `npm run dist` | Build installer Windows + portable |
 | `npm run typecheck` | TypeScript check tanpa emit |
 | `npm run web` | Jalankan server statis tanpa Electron |
@@ -200,9 +201,22 @@ Link download memakai nama asset stabil (`CastV-latest-x64.exe`), jadi
 
 ## 🌐 Deploy
 
-Landing page dikonfigurasi lewat `vercel.json` (static site, output `dist`).
-File installer **tidak** ikut di-deploy karena limit Vercel Hobby 100 MB —
-artefaknya ditaruh di GitHub Release.
+Website publik dibangun dengan konfigurasi terpisah (`vite.site.config.ts`)
+via `npm run build:site`, yang **hanya** memuat landing page.
+
+| Build | Config | Output | Isi |
+|---|---|---|---|
+| Aplikasi desktop | `vite.config.ts` | `dist/` | `index.html` + `app.html` + `receiver.html` |
+| Website publik | `vite.site.config.ts` | `dist-site/` | `index.html` saja |
+
+`app.html` dan `receiver.html` sengaja tidak ikut ke deployment, jadi website
+benar-benar hanya berfungsi sebagai halaman pengenalan + unduhan — CastV
+tidak bisa dijalankan lewat browser. Capture layar dan AirPlay membutuhkan
+aplikasi desktop.
+
+Konfigurasi Vercel ada di `vercel.json` (build `npm run build:site`, output
+`dist-site`). File installer juga tidak ikut di-deploy karena limit Vercel
+Hobby 100 MB — artefaknya ditaruh di GitHub Release.
 
 ---
 

@@ -1,5 +1,6 @@
 # Build artifacts - Vercel builds these itself from source
 dist
+dist-site
 release
 node_modules
 android-tv/app/build

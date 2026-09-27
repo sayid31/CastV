@@ -34,6 +34,7 @@ const STEPS = [
 ];
 
 const FAQ = [
+  { q: 'Apakah CastV bisa dipakai langsung dari browser?', a: 'Tidak. CastV adalah aplikasi desktop untuk Windows karena perlu akses capture layar dan AirPlay bawaan sistem. Situs ini hanya untuk mengunduh aplikasinya.' },
   { q: 'Apakah TV perlu installing aplikasi?', a: 'Tidak. CastV memakai AirPlay bawaan TV. Yang perlu diinstal hanya CastV di laptop.' },
   { q: 'Berapa besar file yang diunduh?', a: 'Sekitar 107 MB untuk installer Windows, dan 107 MB untuk versi portable. Keduanya satu file, tanpa dependency tambahan.' },
   { q: 'Apakah laptop dan TV harus satu Wi-Fi?', a: 'Sebaiknya satu jaringan lokal atau jaringan yang saling bisa dijangkau agar perangkat ditemukan otomatis.' },
@@ -101,6 +102,7 @@ function App() {
                 <span><Icon name="check" size={14} /> Delay beberapa detik</span>
                 <span><Icon name="check" size={14} /> Video H.264 1080p</span>
                 <span><Icon name="check" size={14} /> 100% lokal</span>
+                <span><Icon name="monitor" size={14} /> Berjalan di Windows</span>
               </div>
             </div>
 
