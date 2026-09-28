@@ -194,7 +194,10 @@ export class HlsSegmenter {
   push(data: Uint8Array, info: AirplayFragmentInfo): void {
     if (!this.init) throw new Error('HLS segmenter needs an init segment first.');
     if (info.kind !== 'video') return;
-    if (this.pending.length > 0 && info.keyframe && this.pendingDurationUs >= 950_000) this.flush();
+    // Segment ditutup saat keyframe berikutnya tiba, selama durasi kumulatif
+    // sudah melewati ambang. Mengambil segment pendek menurunkan latensi,
+    // dengan konsekuensi jumlah request HLS jadi lebih sering.
+    if (this.pending.length > 0 && info.keyframe && this.pendingDurationUs >= 250_000) this.flush();
     this.pending.push(data);
     this.pendingDurationUs += info.durationUs;
   }
@@ -211,7 +214,9 @@ export class HlsSegmenter {
     this.pendingDurationUs = 0;
     this.segments.set(segment.sequence, segment);
     const keys = [...this.segments.keys()].sort((a, b) => a - b);
-    while (keys.length > 8) this.segments.delete(keys.shift()!);
+    // Sisakan window waktu yang sama dengan sisi server supaya playlist yang
+    // di-generate di sini tidak lebih pendek dari buffer yang disimpan server.
+    while (keys.length > 90) this.segments.delete(keys.shift()!);
     this.onSegment(segment);
   }
 

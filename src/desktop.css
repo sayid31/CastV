@@ -187,6 +187,20 @@ code, .mono { font-family: 'Cascadia Mono', 'Consolas', ui-monospace, monospace;
 .inline-error { display: flex; align-items: center; gap: 8px; margin-top: 14px; padding: 10px 12px; color: #f79a9a; background: rgba(239, 95, 95, 0.1); border: 1px solid rgba(239, 95, 95, 0.28); border-radius: 9px; font-size: 11.5px; }
 .inline-error svg { flex: 0 0 auto; }
 
+/* AirPlay notice: warning (tidak mematikan) & disconnect (siap diulang) */
+.airplay-notice { display: flex; align-items: flex-start; gap: 10px; margin-top: 14px; padding: 11px 12px; border-radius: 10px; font-size: 11.5px; }
+.airplay-notice > svg { flex: 0 0 auto; margin-top: 1px; }
+.airplay-notice > div { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: 8px; }
+.airplay-notice p { margin: 0; line-height: 1.55; }
+.airplay-notice-warning { color: #f0c38a; background: rgba(232, 145, 58, 0.1); border: 1px solid rgba(232, 145, 58, 0.3); }
+.airplay-notice-warning > svg { color: var(--accent); }
+.airplay-notice-error { color: #f79a9a; background: rgba(239, 95, 95, 0.1); border: 1px solid rgba(239, 95, 95, 0.28); }
+.airplay-notice-error > svg { color: var(--danger); }
+.notice-retry { display: inline-flex; align-self: flex-start; align-items: center; gap: 6px; min-height: 28px; padding: 0 11px; color: #1c1206; background: linear-gradient(140deg, #f0a04a, var(--accent)); border-radius: 7px; font-size: 11.5px; font-weight: 650; }
+.notice-retry:hover { background: linear-gradient(140deg, #f6ad5f, #ec9a41); }
+.notice-close { display: grid; width: 22px; height: 22px; flex: 0 0 auto; place-items: center; color: inherit; opacity: 0.6; border-radius: 5px; }
+.notice-close:hover { opacity: 1; background: rgba(255, 255, 255, 0.08); }
+
 .console-actions { display: flex; align-items: center; gap: 9px; margin-top: 16px; padding-top: 15px; border-top: 1px solid var(--line-soft); }
 .console-actions .primary-button { position: relative; padding: 0 20px; min-height: 38px; font-size: 13.5px; box-shadow: 0 6px 20px rgba(232, 145, 58, 0.22); }
 .console-actions .primary-button:hover { box-shadow: 0 10px 28px rgba(232, 145, 58, 0.34); transform: translateY(-1px); }

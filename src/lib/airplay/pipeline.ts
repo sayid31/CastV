@@ -50,9 +50,13 @@ export class AirplayVideoPipeline {
   private segmentCount = 0;
   private targetWidth = 1280;
   private targetHeight = 720;
+  // Keyframe interval drives the latency floor: a screen change cannot be
+  // published until the next keyframe closes a segment.
+  private readonly keyframeIntervalUs: number;
 
-  constructor(callbacks: AirplayPipelineCallbacks) {
+  constructor(callbacks: AirplayPipelineCallbacks, options: { keyframeIntervalMs?: number } = {}) {
     this.callbacks = callbacks;
+    this.keyframeIntervalUs = Math.max(200, Math.round((options.keyframeIntervalMs ?? 500))) * 1000;
   }
 
   get active(): boolean {
@@ -165,7 +169,7 @@ export class AirplayVideoPipeline {
     } catch {
       return;
     }
-    const keyFrame = timestampUs - this.lastKeyframeUs >= 2_000_000;
+    const keyFrame = timestampUs - this.lastKeyframeUs >= this.keyframeIntervalUs;
     if (keyFrame) this.lastKeyframeUs = timestampUs;
     this.encoder.encode(frame, { keyFrame });
     frame.close();

@@ -147,6 +147,16 @@ function configureIpc() {
       port: target.port,
       name: target.name,
       senderName: 'CastV',
+      onClose: () => {
+        // TV menutup koneksi di tengah presentasi. Beri tahu renderer supaya
+        // bisa menampilkan status "TV terputus" beserta tombol sambung ulang.
+        if (airplayClient !== client) return;
+        airplayClient = null;
+        mainWindow?.webContents.send('castv:airplay-disconnected', {
+          name: target.name,
+          message: 'TV menutup koneksi AirPlay. TV mungkin sleep, ganti input, atau kehabisan memori.',
+        });
+      },
     });
     try {
       const info = await client.getInfo();
@@ -155,12 +165,18 @@ function configureIpc() {
       const fetchBaseline = castServer.getAirplayFetchCount(target.address);
       await client.play(streamUrl);
       airplayClient = client;
+      // Watchdog hanya memberi PERINGATAN, tidak lagi mematikan stream.
+      // Sebelumnya stream dimatikan otomatis sebelum 1 menit hanya karena TV
+      // butuh >12 detik untuk mulai mengambil segment.
       airplayWatchdog = setTimeout(() => {
         if (airplayClient !== client) return;
         if (castServer.getAirplayFetchCount(target.address) <= fetchBaseline) {
-          mainWindow?.webContents.send('castv:airplay-error', 'TV menerimaAirPlay, tetapi belum mengambil stream. Periksa firewall Windows untuk jaringan Private.');
+          mainWindow?.webContents.send('castv:airplay-warning', {
+            name: target.name,
+            message: 'TV belum mengambil stream. Kalau layar tetap kosong, periksa firewall Windows untuk jaringan Private.',
+          });
         }
-      }, 12000);
+      }, 30000);
       return { ok: true, streamUrl, info: { name: info.name, model: info.model, sourceVersion: info.sourceVersion } };
     } catch (error) {
       client.close();

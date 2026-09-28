@@ -20,4 +20,14 @@ contextBridge.exposeInMainWorld('castv', {
     ipcRenderer.on('castv:airplay-error', listener);
     return () => ipcRenderer.removeListener('castv:airplay-error', listener);
   },
+  onAirplayWarning: (callback) => {
+    const listener = (_event, payload) => callback(payload);
+    ipcRenderer.on('castv:airplay-warning', listener);
+    return () => ipcRenderer.removeListener('castv:airplay-warning', listener);
+  },
+  onAirplayDisconnected: (callback) => {
+    const listener = (_event, payload) => callback(payload);
+    ipcRenderer.on('castv:airplay-disconnected', listener);
+    return () => ipcRenderer.removeListener('castv:airplay-disconnected', listener);
+  },
 });

@@ -40,6 +40,8 @@ declare global {
       playAirplay: (target: CastTarget) => Promise<{ ok: boolean; streamUrl: string; info: { name?: string; model?: string; sourceVersion?: string } }>;
       stopAirplay: () => Promise<boolean>;
       onAirplayError: (callback: (message: string) => void) => () => void;
+      onAirplayWarning: (callback: (payload: { name: string; message: string }) => void) => () => void;
+      onAirplayDisconnected: (callback: (payload: { name: string; message: string }) => void) => () => void;
     };
   }
 }

@@ -80,6 +80,8 @@ export function SenderConsole() {
   const [castTargets, setCastTargets] = useState<CastTarget[]>([]);
   const [selectedCastTarget, setSelectedCastTarget] = useState<CastTarget | null>(null);
   const [activeAirplayTarget, setActiveAirplayTarget] = useState<CastTarget | null>(null);
+  const [airplayNotice, setAirplayNotice] = useState<{ tone: 'warning' | 'error'; message: string } | null>(null);
+  const [lastAirplayTarget, setLastAirplayTarget] = useState<CastTarget | null>(null);
 
   const socketRef = useRef<WebSocket | null>(null);
   const nearbySocketRef = useRef<WebSocket | null>(null);
@@ -222,6 +224,37 @@ export function SenderConsole() {
       setActiveAirplayTarget(null);
     });
   }, []);
+
+  // Peringatan: TIDAK menghentikan stream, hanya memberi tahu pengguna.
+  useEffect(() => {
+    const api = window.castv;
+    if (!api?.onAirplayWarning) return;
+    return api.onAirplayWarning((payload) => {
+      setAirplayNotice({ tone: 'warning', message: payload?.message || 'TV belum mengambil stream.' });
+    });
+  }, []);
+
+  // TV menutup koneksi di tengah presentasi: beri status + tombol sambung
+  // ulang, jangan sampai stream hilang tanpa penjelasan.
+  useEffect(() => {
+    const api = window.castv;
+    if (!api?.onAirplayDisconnected) return;
+    return api.onAirplayDisconnected((payload) => {
+      airplayTargetRef.current = null;
+      setLastAirplayTarget(activeAirplayTargetRef.current);
+      setActiveAirplayTarget(null);
+      setStatus('error');
+      setAirplayNotice({
+        tone: 'error',
+        message: `${payload?.name || 'TV'} terputus. ${payload?.message || ''}`.trim(),
+      });
+    });
+  }, []);
+
+  const activeAirplayTargetRef = useRef<CastTarget | null>(null);
+  useEffect(() => {
+    activeAirplayTargetRef.current = activeAirplayTarget;
+  }, [activeAirplayTarget]);
 
   useEffect(() => {
     const socket = new WebSocket(getSignalingUrl());
@@ -417,8 +450,29 @@ export function SenderConsole() {
       streamRef.current = stream;
       setHasStream(true);
       const [firstVideoTrack] = stream.getVideoTracks();
+      // Track capture bisa berakhir sendiri (perubahan konfigurasi monitor,
+      // sumber jadi tidak valid, atau share dihentikan dari Windows). formerly
+      // ini langsung mematikan semua tanpa penjelasan, sehingga terlihat
+      // seperti "otomatis keluar" - sekarang beri tahu + izinkan ulang.
       firstVideoTrack?.addEventListener('ended', () => {
-        if (streamRef.current === stream) stopSharing();
+        if (streamRef.current !== stream) return;
+        if (isAirplay) {
+          const pipeline = airplayPipelineRef.current;
+          airplayPipelineRef.current = null;
+          if (pipeline) void pipeline.stop();
+          setLastAirplayTarget(airplayTargetRef.current);
+          airplayTargetRef.current = null;
+          setActiveAirplayTarget(null);
+          setHasStream(false);
+          setReceiverReady(false);
+          setStatus('error');
+          setAirplayNotice({
+            tone: 'error',
+            message: 'Capture layar terputus. Monitor berubah, sumber tidak valid, atau share dihentikan dari Windows. Klik "Bagikan lagi" untuk mengulang.',
+          });
+          return;
+        }
+        stopSharing();
       });
 
       if (isAirplay && airplayTarget) {
@@ -672,6 +726,30 @@ export function SenderConsole() {
           )}
 
           {error && <div className="inline-error"><Icon name="x" size={15} /> {error}</div>}
+
+          {airplayNotice && (
+            <div className={`airplay-notice airplay-notice-${airplayNotice.tone}`} role="status">
+              <Icon name={airplayNotice.tone === 'error' ? 'x' : 'info'} size={16} />
+              <div>
+                <p>{airplayNotice.message}</p>
+                {airplayNotice.tone === 'error' && lastAirplayTarget && (
+                  <button
+                    className="notice-retry"
+                    onClick={() => {
+                      const target = lastAirplayTarget;
+                      setAirplayNotice(null);
+                      void startCapture(undefined, target);
+                    }}
+                  >
+                    <Icon name="refresh" size={14} /> Bagikan lagi
+                  </button>
+                )}
+              </div>
+              <button className="notice-close" onClick={() => setAirplayNotice(null)} aria-label="Tutup pemberitahuan">
+                <Icon name="x" size={14} />
+              </button>
+            </div>
+          )}
 
           <div className="console-actions">
             {!hasStream ? (

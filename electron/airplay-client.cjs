@@ -13,16 +13,18 @@ function toBuffer(value) {
 }
 
 class AirPlayV1Client {
-  constructor({ host, port, name = 'CastV', senderName = 'CastV' }) {
+  constructor({ host, port, name = 'CastV', senderName = 'CastV', onClose } = {}) {
     this.host = host;
     this.port = Number(port) || 7000;
     this.name = name;
     this.senderName = senderName;
+    this.onClose = typeof onClose === 'function' ? onClose : null;
     this.sessionId = randomBytes(16).toString('hex').toUpperCase();
     this.socket = null;
     this.rx = Buffer.alloc(0);
     this.queue = [];
     this.closed = false;
+    this.intentionalClose = false;
   }
 
   connect(timeoutMs = 7000) {
@@ -46,6 +48,12 @@ class AirPlayV1Client {
       socket.on('close', () => {
         this.closed = true;
         this.fail(new Error('AirPlay connection closed'));
+        // TV yang menutup koneksi berarti playback sudah berhenti. Laporkan
+        // ke renderer supaya user melihat "TV terputus" dan bisa menyambung
+        // lagi, bukan diam-diam_recv dan juga tidak langsung error.
+        if (!this.intentionalClose && this.onClose) {
+          try { this.onClose(); } catch { /* never let a callback break teardown */ }
+        }
       });
     });
   }
@@ -162,6 +170,7 @@ class AirPlayV1Client {
   }
 
   close() {
+    this.intentionalClose = true;
     this.closed = true;
     this.socket?.destroy();
     this.socket = null;

@@ -94,6 +94,25 @@ function createCastServer(options = {}) {
     return version;
   }
 
+  // Segment HLS disimpan dalam jumlah waktu, bukan jumlah file. Segment pendek
+  // (untuk latensi rendah) tetap harus menyisakan buffer yang cukup supaya
+  // TV yang lambat tidak meminta segment yang sudah dibuang dan mendapat 404.
+  const AIRPLAY_SEGMENT_WINDOW_SEC = 30;
+  const AIRPLAY_MAX_SEGMENTS = 90;
+
+  function trimAirplaySegments() {
+    const ordered = [...airplayStream.segments.entries()].sort((a, b) => a[0] - b[0]);
+    if (ordered.length <= 1) return;
+    let total = 0;
+    for (const [, item] of ordered) total += item.duration;
+    let start = 0;
+    while (start < ordered.length - 1 && (total - ordered[start][1].duration > AIRPLAY_SEGMENT_WINDOW_SEC || ordered.length - start > AIRPLAY_MAX_SEGMENTS)) {
+      total -= ordered[start][1].duration;
+      airplayStream.segments.delete(ordered[start][0]);
+      start += 1;
+    }
+  }
+
   function setAirplaySegment(data, info = {}) {
     const buffer = Buffer.isBuffer(data) ? data : Buffer.from(data);
     const sequence = Number(info.sequence);
@@ -103,8 +122,7 @@ function createCastServer(options = {}) {
       duration: Number(info.duration) || 1,
       initVersion: Number(info.initVersion) || airplayStream.initVersion,
     });
-    const ordered = [...airplayStream.segments.keys()].sort((a, b) => a - b);
-    while (ordered.length > 12) airplayStream.segments.delete(ordered.shift());
+    trimAirplaySegments();
     return true;
   }
 
