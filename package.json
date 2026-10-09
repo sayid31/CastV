@@ -16,6 +16,8 @@
     "discover:cast": "node scripts/discover-devices.cjs",
     "probe:tv": "node scripts/probe-tv.cjs",
     "test:rtp": "node scripts/test-rtp-h264.cjs",
+    "test:fairplay": "node scripts/test-fairplay-session.cjs",
+    "test:airplay": "node scripts/test-rtp-h264.cjs && node scripts/test-fairplay-session.cjs",
     "downloads:sync": "node scripts/sync-downloads.cjs",
     "typecheck": "tsc --noEmit"
   },
