@@ -120,6 +120,7 @@ jobs:
         run: |
           $releaseId = gh api "repos/$env:REPO/releases/tags/$env:TAG" --jq .id
           if (-not $releaseId) { throw "Release id tidak ditemukan untuk $env:TAG" }
+          Write-Output "Release $env:TAG -> id $releaseId"
 
           # Asset names intentionally carry no version number, so the landing
           # page URL `releases/latest/download/CastV-latest-x64.exe` keeps
@@ -131,15 +132,20 @@ jobs:
 
           foreach ($a in $assets) {
             if (-not (Test-Path $a.src)) { throw "File tidak ada: $($a.src)" }
-            Write-Output "Mengupload $($a.name)..."
-            gh api --method POST `
-              -H "Content-Type: application/octet-stream" `
-              --input $a.src `
-              "repos/$env:REPO/releases/$releaseId/assets?name=$($a.name)" `
-              --silent
-            if ($LASTEXITCODE -ne 0) { throw "Gagal mengupload $($a.src)" }
             $mb = [math]::Round((Get-Item $a.src).Length / 1MB, 1)
-            Write-Output "  OK $($a.name) ($mb MB)"
+            Write-Output "Mengupload $($a.name) ($mb MB)..."
+            # `gh api --input` returns 404 for binary asset uploads, so the
+            # upload goes through curl which handles large bodies reliably.
+            curl.exe --silent --show-error --fail `
+              --request POST `
+              --url "https://uploads.github.com/repos/$env:REPO/releases/$releaseId/assets?name=$($a.name)" `
+              --header "Authorization: Bearer $env:GH_TOKEN" `
+              --header "Accept: application/vnd.github+json" `
+              --header "X-GitHub-Api-Version: 2022-11-28" `
+              --header "Content-Type: application/octet-stream" `
+              --data-binary "@$($a.src)"
+            if ($LASTEXITCODE -ne 0) { throw "Gagal mengupload $($a.src)" }
+            Write-Output "  OK $($a.name)"
           }
 
       - name: Summarise
