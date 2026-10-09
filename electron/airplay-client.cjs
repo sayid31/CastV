@@ -169,6 +169,28 @@ class AirPlayV1Client {
     }
   }
 
+  /**
+   * Keepalive pada channel kontrol AirPlay.
+   *
+   * Receiver seperti Xiaomi TV mengakhiri sesi bila channel RTSP/TCP ini
+   * diam terlalu lama, walaupun playlist HLS masih aktif. `/feedback`
+   * dikirim secara berkala supaya sesi terus hidup selama presentasi.
+   */
+  async feedback() {
+    if (!this.socket || this.closed) return;
+    this.request('POST', '/feedback', {
+      headers: {
+        'User-Agent': 'MediaControl/1.0',
+        'Content-Type': 'text/parameters',
+        'X-Apple-Session-ID': this.sessionId,
+      },
+      timeoutMs: 3000,
+    }).catch(() => {
+      // Feedback bersifat best-effort. Kalau TV sedang sibuk, coba lagi
+      // pada tick berikutnya.
+    });
+  }
+
   close() {
     this.intentionalClose = true;
     this.closed = true;

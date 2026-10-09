@@ -251,6 +251,21 @@ export function SenderConsole() {
     });
   }, []);
 
+  // TV berhenti menarik segment: stream TIDAK dimatikan, tapi user diberi
+  // pemberitahuan dan tombol untuk menyambung ulang.
+  useEffect(() => {
+    const api = window.castv;
+    if (!api?.onAirplayStalled) return;
+    return api.onAirplayStalled((payload) => {
+      if (status !== 'streaming') return;
+      setLastAirplayTarget(activeAirplayTargetRef.current);
+      setAirplayNotice({
+        tone: 'error',
+        message: payload?.message || 'TV berhenti mengambil stream.',
+      });
+    });
+  }, [status]);
+
   const activeAirplayTargetRef = useRef<CastTarget | null>(null);
   useEffect(() => {
     activeAirplayTargetRef.current = activeAirplayTarget;

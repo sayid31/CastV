@@ -30,4 +30,9 @@ contextBridge.exposeInMainWorld('castv', {
     ipcRenderer.on('castv:airplay-disconnected', listener);
     return () => ipcRenderer.removeListener('castv:airplay-disconnected', listener);
   },
+  onAirplayStalled: (callback) => {
+    const listener = (_event, payload) => callback(payload);
+    ipcRenderer.on('castv:airplay-stalled', listener);
+    return () => ipcRenderer.removeListener('castv:airplay-stalled', listener);
+  },
 });

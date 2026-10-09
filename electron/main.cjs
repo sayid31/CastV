@@ -11,6 +11,9 @@ let castServer;
 let castDiscovery;
 let airplayClient;
 let airplayWatchdog;
+let airplayKeepAlive;
+let airplayStallWatch;
+let airplayLastFetchCount = 0;
 let selectedSourceId = null;
 let availableSourceIds = new Set();
 
@@ -83,11 +86,24 @@ function getAirplayStreamHost(targetAddress = '') {
 async function stopAirplayClient() {
   if (airplayWatchdog) clearTimeout(airplayWatchdog);
   airplayWatchdog = null;
+  if (airplayKeepAlive) clearInterval(airplayKeepAlive);
+  airplayKeepAlive = null;
+  if (airplayStallWatch) clearInterval(airplayStallWatch);
+  airplayStallWatch = null;
   if (!airplayClient) return;
   const client = airplayClient;
   airplayClient = null;
   try { await client.stop(); } catch { /* receiver may already be gone */ }
   client.close();
+}
+
+function clearAirplayTimers() {
+  if (airplayWatchdog) clearTimeout(airplayWatchdog);
+  airplayWatchdog = null;
+  if (airplayKeepAlive) clearInterval(airplayKeepAlive);
+  airplayKeepAlive = null;
+  if (airplayStallWatch) clearInterval(airplayStallWatch);
+  airplayStallWatch = null;
 }
 
 function configureIpc() {
@@ -165,6 +181,29 @@ function configureIpc() {
       const fetchBaseline = castServer.getAirplayFetchCount(target.address);
       await client.play(streamUrl);
       airplayClient = client;
+      clearAirplayTimers();
+
+      // Keepalive channel kontrol: receiver mengakhiri sesi bila RTSP/TCP
+      // ini diam, terlepas dari playlist HLS yang masih tersaji. Tanpa ini
+      // presentasi bisa berhenti sendiri setelah +/- 1 menit.
+      airplayKeepAlive = setInterval(() => { void client.feedback(); }, 2000);
+
+      // Deteksi TV berhenti mengambil segment. Hanya memberi peringatan dan
+      // tombol ulangi - TIDAK mematikan stream otomatis.
+      airplayLastFetchCount = castServer.getAirplayFetchCount(target.address);
+      airplayStallWatch = setInterval(() => {
+        if (airplayClient !== client) return;
+        const current = castServer.getAirplayFetchCount(target.address);
+        if (current > airplayLastFetchCount) {
+          airplayLastFetchCount = current;
+          return;
+        }
+        mainWindow?.webContents.send('castv:airplay-stalled', {
+          name: target.name,
+          message: 'TV berhenti mengambil stream. Layar di TV mungkin membeku. Klik "Bagikan lagi" untuk menyambung ulang.',
+        });
+      }, 15000);
+
       // Watchdog hanya memberi PERINGATAN, tidak lagi mematikan stream.
       // Sebelumnya stream dimatikan otomatis sebelum 1 menit hanya karena TV
       // butuh >12 detik untuk mulai mengambil segment.

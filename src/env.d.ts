@@ -42,6 +42,7 @@ declare global {
       onAirplayError: (callback: (message: string) => void) => () => void;
       onAirplayWarning: (callback: (payload: { name: string; message: string }) => void) => () => void;
       onAirplayDisconnected: (callback: (payload: { name: string; message: string }) => void) => () => void;
+      onAirplayStalled: (callback: (payload: { name: string; message: string }) => void) => () => void;
     };
   }
 }
