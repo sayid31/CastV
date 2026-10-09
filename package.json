@@ -14,6 +14,8 @@
     "dist": "npm run build && electron-builder --win",
     "dist:dir": "npm run build && electron-builder --win --dir",
     "discover:cast": "node scripts/discover-devices.cjs",
+    "probe:tv": "node scripts/probe-tv.cjs",
+    "test:rtp": "node scripts/test-rtp-h264.cjs",
     "downloads:sync": "node scripts/sync-downloads.cjs",
     "typecheck": "tsc --noEmit"
   },
