@@ -14,6 +14,8 @@ let airplayWatchdog;
 let airplayKeepAlive;
 let airplayStallWatch;
 let airplayLastFetchCount = 0;
+let airplayStartedAt = 0;
+let airplayKeepAliveSent = 0;
 let selectedSourceId = null;
 let availableSourceIds = new Set();
 
@@ -168,9 +170,14 @@ function configureIpc() {
         // bisa menampilkan status "TV terputus" beserta tombol sambung ulang.
         if (airplayClient !== client) return;
         airplayClient = null;
+        clearAirplayTimers();
+        const elapsed = Math.round((Date.now() - airplayStartedAt) / 1000);
         mainWindow?.webContents.send('castv:airplay-disconnected', {
           name: target.name,
-          message: 'TV menutup koneksi AirPlay. TV mungkin sleep, ganti input, atau kehabisan memori.',
+          elapsedSec: elapsed,
+          keepAliveSent: airplayKeepAliveSent,
+          message: `TV menutup koneksi AirPlay setelah ${elapsed} detik (${airplayKeepAliveSent} keepalive terkirim). `
+            + 'TV mungkin sleep, ganti input, atau kehabisan memori.',
         });
       },
     });
@@ -182,11 +189,13 @@ function configureIpc() {
       await client.play(streamUrl);
       airplayClient = client;
       clearAirplayTimers();
+      airplayStartedAt = Date.now();
+      airplayKeepAliveSent = 0;
 
       // Keepalive channel kontrol: receiver mengakhiri sesi bila RTSP/TCP
       // ini diam, terlepas dari playlist HLS yang masih tersaji. Tanpa ini
       // presentasi bisa berhenti sendiri setelah +/- 1 menit.
-      airplayKeepAlive = setInterval(() => { void client.feedback(); }, 2000);
+      airplayKeepAlive = setInterval(() => { airplayKeepAliveSent += 1; void client.feedback(); }, 2000);
 
       // Deteksi TV berhenti mengambil segment. Hanya memberi peringatan dan
       // tombol ulangi - TIDAK mematikan stream otomatis.
