@@ -2,6 +2,7 @@ const { app, BrowserWindow, desktopCapturer, dialog, ipcMain, session, shell } =
 const path = require('node:path');
 const { createCastServer, getLanAddresses } = require('../server/index.cjs');
 const { AirPlayV1Client } = require('./airplay-client.cjs');
+const { MirrorSession } = require('./airplay/mirror-session.cjs');
 const { CastDiscovery } = require('./cast-discovery.cjs');
 
 const isDevelopment = Boolean(process.env.CASTV_DEV_SERVER_URL);
@@ -16,6 +17,9 @@ let airplayStallWatch;
 let airplayLastFetchCount = 0;
 let airplayStartedAt = 0;
 let airplayKeepAliveSent = 0;
+// Sesi AirPlay DIRECT MIRRORING (AirPlay 1 / RTP+UDP). Berdiri sendiri dari
+// airplayClient di atas yang memakai jalur HLS.
+let mirrorSession = null;
 let selectedSourceId = null;
 let availableSourceIds = new Set();
 
@@ -108,6 +112,14 @@ function clearAirplayTimers() {
   airplayStallWatch = null;
 }
 
+/** Hentikan sesi direct mirroring bila ada. Selalu aman dipanggil dua kali. */
+async function stopMirrorSession() {
+  if (!mirrorSession) return;
+  const session = mirrorSession;
+  mirrorSession = null;
+  try { await session.stop(); } catch { /* receiver may already be gone */ }
+}
+
 function configureIpc() {
   ipcMain.handle('castv:get-display-sources', async (event) => {
     if (!isTrustedRenderer(event)) return [];
@@ -159,6 +171,9 @@ function configureIpc() {
     if (!isTrustedRenderer(event) || !castServer || !target || target.protocol !== 'airplay') {
       throw new Error('Target AirPlay tidak valid.');
     }
+    // Hanya boleh ada satu sesi AirPlay pada satu TV. Menutup sesi
+    // mirroring yang mungkin masih berjalan sebelum membuka jalur HLS.
+    await stopMirrorSession();
     await stopAirplayClient();
     const client = new AirPlayV1Client({
       host: target.address,
@@ -238,6 +253,75 @@ function configureIpc() {
     castServer?.resetAirplayStream();
     return true;
   });
+
+  // ---------------------------------------------------------------------
+  // AirPlay DIRECT MIRRORING (AirPlay 1 / RTP over UDP).
+  //
+  // Berbeda dari jalur HLS di atas: tidak ada server HTTP, tidak ada playlist.
+  // Negosiasi terjadi langsung lewat RTSP ke TV, lalu video dikirim sebagai
+  // paket UDP terenkripsi FairPlay. Ini jalur yang memberi latensi rendah.
+  // ---------------------------------------------------------------------
+
+  ipcMain.handle('castv:mirror-start', async (event, target, options) => {
+    if (!isTrustedRenderer(event) || !target || target.protocol !== 'airplay') {
+      throw new Error('Target mirroring tidak valid.');
+    }
+    await stopMirrorSession();
+    const session = new MirrorSession({
+      host: target.address,
+      port: target.port || 7000,
+      options: options || {},
+      onStateChange: (state, detail) => {
+        mainWindow?.webContents.send('castv:mirror-state', { state, detail, name: target.name });
+      },
+      onReport: (report, stats) => {
+        // Laporan kehilangan paket dari TV. Berguna untuk memberi tahu user
+        // sebelum gambar benar-benar rusak saat presentasi.
+        mainWindow?.webContents.send('castv:mirror-report', {
+          fractionLost: report.fractionLost,
+          cumulativeLost: report.cumulativeLost,
+          jitter: report.jitter,
+          framesSent: stats.framesSent,
+          packetsSent: stats.packetsSent,
+          droppedPackets: stats.droppedPackets,
+        });
+      },
+      onError: (error) => {
+        mainWindow?.webContents.send('castv:mirror-error', { message: error?.message || String(error) });
+      },
+    });
+    // Pasang sebelum start() supaya error saat negosiasi tetap dilaporkan.
+    mirrorSession = session;
+    try {
+      const diagnostics = await session.start();
+      return { ok: true, diagnostics };
+    } catch (error) {
+      // Negosiasi gagal -> jangan tinggalkan sesi setengah jadi menggantung.
+      if (mirrorSession === session) mirrorSession = null;
+      try { await session.stop(); } catch { /* ignore */ }
+      throw new Error(error?.message || 'Gagal memulai mirroring.');
+    }
+  });
+
+  ipcMain.handle('castv:mirror-frame', async (event, frame) => {
+    if (!isTrustedRenderer(event)) return { sent: 0, packets: 0 };
+    if (!mirrorSession) throw new Error('Sesi mirroring tidak aktif.');
+    const buffer = Buffer.isBuffer(frame)
+      ? frame
+      : Buffer.from(frame?.buffer ? new Uint8Array(frame.buffer) : frame);
+    return mirrorSession.sendFrame(buffer);
+  });
+
+  ipcMain.handle('castv:mirror-stop', async (event) => {
+    if (!isTrustedRenderer(event)) return false;
+    await stopMirrorSession();
+    return true;
+  });
+
+  ipcMain.handle('castv:mirror-diagnostics', async (event) => {
+    if (!isTrustedRenderer(event)) return null;
+    return mirrorSession ? mirrorSession.diagnostics() : null;
+  });
 }
 
 function configureDisplayMedia() {
@@ -308,6 +392,9 @@ app.on('activate', () => {
 
 app.on('before-quit', async (event) => {
   castDiscovery?.stop();
+  // Sesi mirroring ditutup lebih dulu: ia memegang socket UDP dan perlu
+  // melepas RTSP dengan rapi supaya TV tidak menampilkan gambar beku.
+  await stopMirrorSession();
   if (!castServer) {
     await stopAirplayClient();
     return;

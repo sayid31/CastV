@@ -19,7 +19,8 @@
     "test:fairplay": "node scripts/test-fairplay-session.cjs",
     "test:crypto": "node scripts/test-mirror-crypto.cjs",
     "test:transport": "node scripts/test-mirror-transport.cjs",
-    "test:airplay": "node scripts/test-rtp-h264.cjs && node scripts/test-fairplay-session.cjs && node scripts/test-mirror-crypto.cjs && node scripts/test-mirror-transport.cjs",
+    "test:session": "node scripts/test-mirror-session.cjs",
+    "test:airplay": "node scripts/test-rtp-h264.cjs && node scripts/test-fairplay-session.cjs && node scripts/test-mirror-crypto.cjs && node scripts/test-mirror-transport.cjs && node scripts/test-mirror-session.cjs",
     "downloads:sync": "node scripts/sync-downloads.cjs",
     "typecheck": "tsc --noEmit"
   },
