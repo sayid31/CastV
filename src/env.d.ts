@@ -43,6 +43,18 @@ declare global {
       onAirplayWarning: (callback: (payload: { name: string; message: string }) => void) => () => void;
       onAirplayDisconnected: (callback: (payload: { name: string; message: string }) => void) => () => void;
       onAirplayStalled: (callback: (payload: { name: string; message: string }) => void) => () => void;
+
+      // AirPlay direct mirroring (latensi rendah, tanpa HLS).
+      startMirror: (
+        target: CastTarget,
+        options?: { cipherMode?: 'cbc' | 'cfb'; fps?: number; width?: number; height?: number; rsaPkcs1Padding?: boolean },
+      ) => Promise<{ ok: boolean; diagnostics: unknown }>;
+      sendMirrorFrame: (frame: Uint8Array) => Promise<{ sent: number; packets: number }>;
+      stopMirror: () => Promise<boolean>;
+      mirrorDiagnostics: () => Promise<unknown>;
+      onMirrorState: (callback: (payload: { state: string; detail?: Record<string, unknown>; name?: string }) => void) => () => void;
+      onMirrorReport: (callback: (payload: { fractionLost: number; cumulativeLost: number; jitter: number; framesSent: number; packetsSent: number; droppedPackets: number }) => void) => () => void;
+      onMirrorError: (callback: (message: string) => void) => () => void;
     };
   }
 }

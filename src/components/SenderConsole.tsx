@@ -82,6 +82,16 @@ export function SenderConsole() {
   const [activeAirplayTarget, setActiveAirplayTarget] = useState<CastTarget | null>(null);
   const [airplayNotice, setAirplayNotice] = useState<{ tone: 'warning' | 'error'; message: string } | null>(null);
   const [lastAirplayTarget, setLastAirplayTarget] = useState<CastTarget | null>(null);
+  // Cara AirPlay dikirim ke TV:
+  //   'hls'    - default. Sudah terbukti jalan, tapi TV harus mengumpulkan
+  //              beberapa segmen dulu sehingga latensi 1.5-3 detik.
+  //   'mirror' - direct mirroring lewat RTP/UDP. Potensial ~150 ms, tapi
+  //              belum pernah diuji terhadap perangkat nyata.
+  const [airplayMode, setAirplayMode] = useState<'hls' | 'mirror'>('hls');
+  // Mode enkripsi FairPlay. Belum ada data perangkat untuk memastikan mana
+  // yang dipakai TV, jadi bisa diganti tanpa menyentuh kode.
+  const [mirrorCipher, setMirrorCipher] = useState<'cbc' | 'cfb'>('cbc');
+  const [mirrorReport, setMirrorReport] = useState<{ fractionLost: number; packetsSent: number } | null>(null);
 
   const socketRef = useRef<WebSocket | null>(null);
   const nearbySocketRef = useRef<WebSocket | null>(null);
@@ -120,7 +130,12 @@ export function SenderConsole() {
     if (pipeline) void pipeline.stop();
     const target = airplayTargetRef.current;
     airplayTargetRef.current = null;
+    // Dua jalur AirPlay punya tombol berhenti masing-masing. Keduanya dipanggil
+    // karena tidak selalu jelas jalur mana yang sedang aktif - cleanup yang
+    // meleset akan meninggalkan TV menampilkan gambar beku atau sesi UDP
+    // tetap terbuka.
     if (target && window.castv?.stopAirplay) void window.castv.stopAirplay();
+    if (window.castv?.stopMirror) void window.castv.stopMirror();
     setActiveAirplayTarget(null);
   };
 
@@ -270,6 +285,31 @@ export function SenderConsole() {
   useEffect(() => {
     activeAirplayTargetRef.current = activeAirplayTarget;
   }, [activeAirplayTarget]);
+
+  // Laporan packet loss dari TV pada jalur mirroring. Receiver mengirim
+  // Receiver Report berisi persentase paket hilang - ini satu-satunya cara
+  // nyata untuk tahu seberapa sehat stream di kabel saat presentasi.
+  useEffect(() => {
+    const api = window.castv;
+    if (!api?.onMirrorReport) return;
+    return api.onMirrorReport((report) => {
+      setMirrorReport({ fractionLost: report.fractionLost, packetsSent: report.packetsSent });
+    });
+  }, []);
+
+  // Negosiasi mirroring gagal di tengah jalan (port hilang, TV menutup sesi).
+  useEffect(() => {
+    const api = window.castv;
+    if (!api?.onMirrorError) return;
+    return api.onMirrorError((message) => {
+      if (status !== 'streaming') return;
+      setAirplayNotice({ tone: 'warning', message: `Mirroring: ${message}` });
+    });
+  }, [status]);
+
+  useEffect(() => {
+    if (status !== 'streaming') setMirrorReport(null);
+  }, [status, airplayMode]);
 
   useEffect(() => {
     const socket = new WebSocket(getSignalingUrl());
@@ -497,6 +537,37 @@ export function SenderConsole() {
         setNearbyConnectingId(airplayTarget.id);
         airplayTargetRef.current = airplayTarget;
         setActiveAirplayTarget(airplayTarget);
+
+        if (airplayMode === 'mirror') {
+          // ---- Jalur direct mirroring (latensi rendah) ----------------
+          // Negosiasi FairPlay + RTSP terjadi di proses utama, lalu setiap
+          // access unit H.264 mentah diteruskan lewat IPC untuk dikirim
+          // sebagai paket RTP terenkripsi.
+          if (!window.castv?.startMirror) throw new Error('Mode mirroring tidak tersedia pada build ini.');
+          const result = await window.castv.startMirror(airplayTarget, { fps: 30, cipherMode: mirrorCipher });
+          if (!result.ok) throw new Error('TV tidak menerima sesi mirroring.');
+
+          const pipeline = new AirplayVideoPipeline({
+            onMeta: () => undefined,
+            onInit: () => undefined,
+            onSegment: () => undefined,
+            onAccessUnit: (data) => window.castv!.sendMirrorFrame(data),
+            onError: (pipelineError) => setError(pipelineError.message),
+          }, { mode: 'mirror' });
+          airplayPipelineRef.current = pipeline;
+          await pipeline.start(stream);
+          // Sesi mirroring dianggap siap begitu frame pertama benar-benar
+          // terkirim - bukan setelah segmen HLS selesai.
+          await pipeline.waitUntilReady();
+          peerReadyRef.current = true;
+          setReceiverReady(true);
+          setNearbyConnectingId('');
+          setSelectedCastTarget(airplayTarget);
+          setStatus('streaming');
+          return;
+        }
+
+        // ---- Jalur HLS (default, sudah terbukti jalan) -----------------
         const pipeline = new AirplayVideoPipeline({
           onMeta: (meta) => window.castv!.setAirplayMeta(meta),
           onInit: (data) => window.castv!.setAirplayInit(data),
@@ -736,7 +807,19 @@ export function SenderConsole() {
             <div className="connection-details">
               <div><span>Alamat jaringan</span><code>{lanLabel}</code></div>
               <div><span>Receiver URL</span><code>{receiverUrl}</code></div>
-              <p><Icon name={activeAirplayTarget ? 'wifi' : 'lock'} size={14} /> {activeAirplayTarget ? 'AirPlay HLS · koneksi lokal (delay beberapa detik).' : 'Stream memakai koneksi WebRTC terenkripsi antar browser.'}</p>
+              <p><Icon name={activeAirplayTarget ? 'wifi' : 'lock'} size={14} /> {activeAirplayTarget
+                ? (airplayMode === 'mirror'
+                  ? 'AirPlay direct mirroring · RTP terenkripsi via FairPlay (latensi rendah).'
+                  : 'AirPlay HLS · koneksi lokal (delay beberapa detik).')
+                : 'Stream memakai koneksi WebRTC terenkripsi antar browser.'}</p>
+              {activeAirplayTarget && airplayMode === 'mirror' && mirrorReport && (
+                <div className="mirror-quality">
+                  <span>Paket terkirim: {mirrorReport.packetsSent}</span>
+                  <span className={mirrorReport.fractionLost > 0.05 ? 'is-bad' : 'is-good'}>
+                    Hilang: {(mirrorReport.fractionLost * 100).toFixed(1)}%
+                  </span>
+                </div>
+              )}
             </div>
           )}
 
@@ -834,6 +917,33 @@ export function SenderConsole() {
               </div>
             ) : (
               <div className="receiver-picker-empty"><div className="receiver-empty-orb"><Icon name="wifi" size={23} /></div><strong>Belum ada receiver nearby</strong><p>TV AirPlay atau browser receiver akan muncul di sini secara otomatis.</p><code>{nearbyEntryUrl || 'Memuat alamat jaringan…'}</code></div>
+            )}
+
+            {airplayTargets.length > 0 && (
+              <div className="airplay-mode-bar">
+                <div className="airplay-mode-copy">
+                  <strong>Cara pengiriman ke TV</strong>
+                  <span>{airplayMode === 'mirror'
+                    ? 'Direct mirroring via RTP — berpotensi nyaris instan, tapi belum diuji di perangkat nyata.'
+                    : 'HLS via server lokal — sudah terbukti jalan, delay 1.5–3 detik.'}</span>
+                </div>
+                <div className="airplay-mode-toggle" role="group" aria-label="Pilih mode AirPlay">
+                  <button type="button" className={airplayMode === 'hls' ? 'is-active' : ''} onClick={() => setAirplayMode('hls')}> Stabil</button>
+                  <button type="button" className={airplayMode === 'mirror' ? 'is-active is-experimental' : ''} onClick={() => setAirplayMode('mirror')}> Cepat (uji)</button>
+                </div>
+                {airplayMode === 'mirror' && (
+                  <div className="airplay-mode-options">
+                    <label>
+                      Enkripsi
+                      <select value={mirrorCipher} onChange={(event) => setMirrorCipher(event.target.value as 'cbc' | 'cfb')}>
+                        <option value="cbc">AES-CBC</option>
+                        <option value="cfb">AES-CFB</option>
+                      </select>
+                    </label>
+                    <small>Ganti bila hasil kosong layarnya — cara tercepat menemukan mode yang dipakai TV.</small>
+                  </div>
+                )}
+              </div>
             )}
             <div className="receiver-picker-qr"><div className="qr-mini-icon"><Icon name="qr" size={19} /></div><div><strong>Belum menemukan perangkat?</strong><span>QR code tetap bisa dipakai sebagai metode alternatif.</span></div><button className="text-button" onClick={() => setReceiverPickerOpen(false)}>Pakai QR <Icon name="arrow-right" size={14} /></button></div>
             <div className="receiver-picker-footer"><span><Icon name="lock" size={14} /> Koneksi tetap private</span><button className="primary-button" disabled={!hasSelectedReceiver || Boolean(nearbyConnectingId)} onClick={() => { if (selectedCastTarget) void connectAirplay(selectedCastTarget); else if (selectedNearbyId) void connectNearby(selectedNearbyId, true); }}>{nearbyConnectingId ? 'Menghubungkan…' : 'Lanjut pilih layar'} <Icon name="arrow-right" size={16} /></button></div>

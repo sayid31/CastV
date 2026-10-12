@@ -19,6 +19,12 @@
   --violet: #8f7cf0;
   --success: #46c98a;
   --danger: #ef5f5f;
+  /* Alias untuk komponen mode AirPlay, memakai nama yang lebih deskriptif
+     daripada menyebut "accent" yang terlalu umum. */
+  --amber: var(--accent);
+  --amber-dim: var(--accent-soft);
+  --amber-line: var(--accent-line);
+  --ok: var(--success);
   --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.03) inset;
   --shadow-pop: 0 24px 60px rgba(0, 0, 0, 0.55);
   --radius: 12px;
@@ -276,6 +282,59 @@ code, .mono { font-family: 'Cascadia Mono', 'Consolas', ui-monospace, monospace;
 .receiver-picker-qr strong { color: var(--text-soft); font-size: 11.5px; font-weight: 600; }
 .receiver-picker-qr span { color: var(--text-muted); font-size: 10.5px; }
 .receiver-picker-qr .text-button { font-size: 11px; white-space: nowrap; }
+
+/* Pemilih mode AirPlay: HLS (terbukti) vs direct mirroring (eksperimental). */
+.airplay-mode-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin: 0 22px 14px;
+  padding: 13px 15px;
+  background: var(--bg-soft);
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+}
+.airplay-mode-copy { display: flex; min-width: 0; flex: 1 1 240px; flex-direction: column; gap: 3px; }
+.airplay-mode-copy strong { color: var(--text-soft); font-size: 11.5px; font-weight: 600; }
+.airplay-mode-copy span { color: var(--text-muted); font-size: 10.5px; line-height: 1.45; }
+
+.airplay-mode-toggle { display: inline-flex; gap: 2px; padding: 3px; background: var(--surface); border: 1px solid var(--line); border-radius: 9px; }
+.airplay-mode-toggle button {
+  padding: 6px 13px;
+  color: var(--text-muted);
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.airplay-mode-toggle button:hover { color: var(--text-soft); }
+.airplay-mode-toggle button.is-active { color: #17130c; background: var(--accent); }
+/* Mode eksperimental ditandai amber dan tidak menyamar sebagai pilihan aman. */
+.airplay-mode-toggle button.is-active.is-experimental { color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent-line); }
+
+.airplay-mode-options { display: flex; flex: 1 0 100%; align-items: center; gap: 12px; flex-wrap: wrap; }
+.airplay-mode-options label { display: inline-flex; align-items: center; gap: 7px; color: var(--text-muted); font-size: 10.5px; }
+.airplay-mode-options select {
+  padding: 4px 8px;
+  color: var(--text-soft);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+.airplay-mode-options small { color: var(--text-muted); font-size: 10.5px; opacity: 0.85; }
+
+/* Kualitas stream mirroring, dihitung dari Receiver Report yang dikirim TV. */
+.mirror-quality { display: flex; gap: 16px; margin-top: 7px; color: var(--text-muted); font-size: 11.5px; }
+.mirror-quality .is-good { color: var(--success); }
+.mirror-quality .is-bad { color: var(--accent); }
 
 .receiver-picker-footer, .source-picker-footer { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 13px 22px; background: var(--bg-soft); border-top: 1px solid var(--line-soft); }
 .receiver-picker-footer > span, .source-picker-footer > span { display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); font-size: 10.5px; }

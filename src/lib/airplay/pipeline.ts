@@ -12,8 +12,30 @@ export type AirplayPipelineCallbacks = {
   onMeta: (meta: AirplayStreamMeta) => Promise<unknown> | unknown;
   onInit: (data: Uint8Array) => Promise<unknown> | unknown;
   onSegment: (segment: AirplaySegment) => Promise<unknown> | unknown;
+  /**
+   * Hanya dipakai pada mode 'mirror': menerima satu access unit H.264 mentah
+   * dalam format Annex-B, siap dikirim per-frame lewat RTP.
+   */
+  onAccessUnit?: (data: Uint8Array, keyframe: boolean) => Promise<unknown> | unknown;
   onError?: (error: Error) => void;
 };
+
+/**
+ * Cara output encoder dipakai:
+ *
+ *   'hls'    - fMP4 + segmen HLS. Receiver mengambil lewat HTTP dari server
+ *              lokal. Stabil, tapi TV harus accumulate beberapa segmen
+ *              sebelum mulai tampil, dan itulah sumber latensi 1.5-3 detik.
+ *
+ *   'mirror' - access unit Annex-B mentah per frame. Tidak ada muxing, tidak
+ *              ada segmen, tidak ada buffering. Ini yang dipakai direct
+ *              AirPlay mirroring lewat RTP.
+ *
+ *beda utama bukan cuma di output: encoder harus diminta menghasilkan
+ * Annex-B, karena RTP/FU-A butuh start code, sedangkan muxer fMP4 butuh
+ * format AVCC (length-prefixed).
+ */
+export type AirplayPipelineMode = 'hls' | 'mirror';
 
 function toBytes(value: ArrayBuffer | ArrayBufferView | undefined): Uint8Array | null {
   if (!value) return null;
@@ -53,10 +75,20 @@ export class AirplayVideoPipeline {
   // Keyframe interval drives the latency floor: a screen change cannot be
   // published until the next keyframe closes a segment.
   private readonly keyframeIntervalUs: number;
+  private readonly mode: AirplayPipelineMode;
+  private accessUnitCount = 0;
 
-  constructor(callbacks: AirplayPipelineCallbacks, options: { keyframeIntervalMs?: number } = {}) {
+  constructor(
+    callbacks: AirplayPipelineCallbacks,
+    options: { keyframeIntervalMs?: number; mode?: AirplayPipelineMode } = {},
+  ) {
     this.callbacks = callbacks;
+    this.mode = options.mode === 'mirror' ? 'mirror' : 'hls';
     this.keyframeIntervalUs = Math.max(200, Math.round((options.keyframeIntervalMs ?? 500))) * 1000;
+  }
+
+  get outputMode(): AirplayPipelineMode {
+    return this.mode;
   }
 
   get active(): boolean {
@@ -83,6 +115,12 @@ export class AirplayVideoPipeline {
     const videoBitrate = 5_000_000;
     const candidates = ['avc1.640028', 'avc1.4D4028', 'avc1.42E01E'];
     let encoderConfig: any = null;
+    // Mode HLS butuh AVCC (length-prefixed) karena fMP4 muxer mem-parsing
+    // description dari metadata. Mode mirror butuh Annex-B (start code)
+    // karena packetizer RTP memisahkan NAL berdasarkan 00 00 01.
+    // Meminta format yang salah di sini berarti video tidak akan pernah
+    // terbaca, jadi ini wajib benar sejak awal.
+    const avcFormat = this.mode === 'mirror' ? 'annexb' : 'avc';
     for (const codec of candidates) {
       const candidate = {
         codec,
@@ -91,7 +129,7 @@ export class AirplayVideoPipeline {
         bitrate: videoBitrate,
         framerate: frameRate,
         latencyMode: 'realtime',
-        avc: { format: 'avc' },
+        avc: { format: avcFormat },
       };
       try {
         if (await VideoEncoderCtor.isConfigSupported(candidate)) {
@@ -114,6 +152,7 @@ export class AirplayVideoPipeline {
     this.frameIntervalUs = Math.round(1_000_000 / frameRate);
     this.initSent = false;
     this.segmentCount = 0;
+    this.accessUnitCount = 0;
     this.readyPromise = new Promise<void>((resolve, reject) => {
       this.resolveReady = resolve;
       this.rejectReady = reject;
@@ -190,6 +229,23 @@ export class AirplayVideoPipeline {
     const measuredDuration = this.lastChunkTimestampUs >= 0 ? nowUs - this.lastChunkTimestampUs : this.frameIntervalUs;
     this.lastChunkTimestampUs = nowUs;
     const durationUs = measuredDuration > 0 ? measuredDuration : (Number(chunk.duration) > 0 ? Number(chunk.duration) : this.frameIntervalUs);
+
+    if (this.mode === 'mirror') {
+      // Jalur direct mirroring: tidak ada muxer, tidak ada segmen. Satu access
+      // unit langsung dikirim. Antrian (outputChain) tetap dipakai supaya
+      // pengiriman berurutan dan tidak saling berebut atas socket UDP.
+      this.outputChain = this.outputChain.then(async () => {
+        if (!this.running) return;
+        if (!this.callbacks.onAccessUnit) return;
+        await this.callbacks.onAccessUnit(data, keyframe);
+        this.accessUnitCount += 1;
+        // Sesi mirroring siap setelah frame pertama benar-benar terkirim,
+        // bukan setelah segmen pertama selesai.
+        if (this.accessUnitCount >= 1) this.resolveReady?.();
+      }).catch((error) => this.fail(error instanceof Error ? error : new Error(String(error))));
+      return;
+    }
+
     this.outputChain = this.outputChain.then(async () => {
       if (!this.running && !this.muxer) return;
       if (!this.muxer) {
